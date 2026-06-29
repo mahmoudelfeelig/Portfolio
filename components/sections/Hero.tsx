@@ -50,9 +50,9 @@ export default function Hero() {
 
             <Text className={styles.metaLabel}>Focus areas</Text>
             <VStack align="start" gap={1.5} mt={2}>
-              <Text className={styles.metaBullet}>- Internal tools and operations software</Text>
-              <Text className={styles.metaBullet}>- Android support applications</Text>
-              <Text className={styles.metaBullet}>- Network monitoring and hardening</Text>
+              <Text className={styles.metaBullet}>Internal tools and operations software</Text>
+              <Text className={styles.metaBullet}>Android support applications</Text>
+              <Text className={styles.metaBullet}>Network monitoring and hardening</Text>
             </VStack>
           </Box>
         </GridItem>

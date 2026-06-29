@@ -196,7 +196,7 @@ export default function SkillTree() {
                             color="gray.300"
                           >
                             {libs.map((lib: string) => (
-                              <Text key={lib}>- {lib}</Text>
+                              <Text key={lib}>{lib}</Text>
                             ))}
                           </VStack>
                         </Collapse>

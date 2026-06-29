@@ -72,7 +72,7 @@ export default function Footer() {
             alignItems="center"
           >
             <Image
-              src="/Logo.png"
+              src="/Logo-transparent.png"
               alt="Mahmoud Elfeel logo"
               width={20}
               height={20}

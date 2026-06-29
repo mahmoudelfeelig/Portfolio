@@ -1,0 +1,358 @@
+export type ProjectCategory = 'live' | 'university' | 'experiment' | 'archived';
+export type ProjectStatus = 'active' | 'archived' | 'featured';
+
+export type PortfolioProject = {
+  id: string;
+  title: string;
+  repoName: string;
+  description: string;
+  category: ProjectCategory;
+  status: ProjectStatus;
+  language: string;
+  stack: string[];
+  repoUrl: string;
+  liveUrl?: string;
+  domain?: string;
+  updatedAt: string;
+  semester?: string;
+  course?: string;
+  highlights: string[];
+  lessonsLearned: string[];
+  featured: boolean;
+};
+
+const github = 'https://github.com/mahmoudelfeelig';
+
+export const projects: PortfolioProject[] = [
+  {
+    id: 'portfolio',
+    title: 'Portfolio',
+    repoName: 'Portfolio',
+    description: 'Personal portfolio built as an interactive OS workspace.',
+    category: 'live',
+    status: 'active',
+    language: 'TypeScript',
+    stack: ['Next.js', 'React', 'Chakra UI', 'Framer Motion', 'Three.js'],
+    repoUrl: `${github}/Portfolio`,
+    liveUrl: 'https://elfeel.me',
+    domain: 'elfeel.me',
+    updatedAt: '2026-06-27',
+    highlights: ['OS-style project shell', 'Responsive portfolio sections', 'Animated WebGL moments'],
+    lessonsLearned: ['Balancing personality with recruiter-friendly clarity.', 'Keeping visual polish tied to real navigation.'],
+    featured: true,
+  },
+  {
+    id: 'scheduler',
+    title: 'Planora',
+    repoName: 'Planora',
+    description: 'An application that makes and improves schedules for all university majors with customizable constraints.',
+    category: 'live',
+    status: 'featured',
+    language: 'Python',
+    stack: ['Python', 'PyQt6', 'OR-Tools', 'CSV', 'ICS', 'PDF export'],
+    repoUrl: `${github}/Planora`,
+    liveUrl: 'https://planora.elfeel.me',
+    domain: 'planora.elfeel.me',
+    updatedAt: '2026-06-20',
+    highlights: ['Constraint-aware timetable generation', 'Calendar export workflows', 'Schedule editing and snapshots'],
+    lessonsLearned: ['Good scheduling tools need explainable constraints.', 'Solver output needs a calm editing layer.'],
+    featured: false,
+  },
+  {
+    id: 'typeshift',
+    title: 'TypeShift',
+    repoName: 'typeshift',
+    description: 'Typing game website with fast rounds, scoring, and competitive play patterns.',
+    category: 'live',
+    status: 'active',
+    language: 'TypeScript',
+    stack: ['Next.js', 'React', 'TypeScript', 'Express', 'PostgreSQL'],
+    repoUrl: `${github}/typeshift`,
+    liveUrl: 'https://typeshift.elfeel.me',
+    domain: 'typeshift.elfeel.me',
+    updatedAt: '2026-06-18',
+    highlights: ['Typing game engine', 'Leaderboard-ready data model', 'Responsive game UI'],
+    lessonsLearned: ['Input latency and feedback timing define the experience.', 'Game UI needs clear state before ornament.'],
+    featured: false,
+  },
+  {
+    id: 'commit',
+    title: 'Commit',
+    repoName: 'Commit',
+    description: 'Browser-based GitHub contribution graph designer for painting contribution cells and exporting git commit commands.',
+    category: 'live',
+    status: 'active',
+    language: 'Python',
+    stack: ['Python', 'JavaScript', 'CSS', 'HTML', 'localStorage', 'Git'],
+    repoUrl: `${github}/Commit`,
+    liveUrl: 'https://commit.elfeel.me',
+    updatedAt: '2026-06-26',
+    domain: 'commit.elfeel.me',
+    highlights: ['Contribution cell painting', 'Multi-year range editing', 'Git command export'],
+    lessonsLearned: ['Contribution tooling should keep generated commands explicit before execution.', 'Static browser apps can still handle durable workflow state with localStorage.'],
+    featured: false,
+  },
+  {
+    id: 'ocpp-demo',
+    title: 'OCPP-Demo',
+    repoName: 'OCPP-Demo',
+    description: 'Website demo exploring 1.6 OCPP-style charger communication flows.',
+    category: 'experiment',
+    status: 'active',
+    language: 'Python',
+    stack: ['Python', 'OCPP', 'WebSockets'],
+    repoUrl: `${github}/OCPP-Demo`,
+    liveUrl: 'https://ocpp.elfeel.me',
+    updatedAt: '2026-05-11',
+    domain: 'ocpp.elfeel.me',
+    highlights: ['Protocol message flow', 'Demo charging sessions'],
+    lessonsLearned: ['Protocol demos need readable event traces.'],
+    featured: false,
+  },
+  {
+    id: 'doompedia',
+    title: 'Doompedia',
+    repoName: 'doompedia',
+    description: 'Offline Wikipedia-style substitute app for healthier doom scrolling.',
+    category: 'live',
+    status: 'active',
+    language: 'Kotlin',
+    stack: ['Kotlin', 'Jetpack Compose', 'Offline data', 'Mobile UX'],
+    repoUrl: `${github}/doompedia`,
+    updatedAt: '2026-06-10',
+    domain: 'Mobile App',
+    highlights: ['Offline-first reading', 'Healthier discovery loop', 'Native mobile interface'],
+    lessonsLearned: ['Mobile information apps need fast retrieval and strong boundaries.'],
+    featured: false,
+  },
+  {
+    id: 'anubis',
+    title: 'Anubis',
+    repoName: 'Anubis',
+    description: 'TypeScript product experiment with puzzle and progression mechanics.',
+    category: 'experiment',
+    status: 'active',
+    language: 'TypeScript',
+    stack: ['Next.js', 'React', 'TypeScript', 'MongoDB'],
+    repoUrl: `${github}/Anubis`,
+    updatedAt: '2026-04-30',
+    domain: 'Website',
+    highlights: ['Puzzle levels', 'Progression state', 'Content-driven structure'],
+    lessonsLearned: ['ARG-style products need tight content tooling.'],
+    featured: false,
+  },
+  {
+    id: 'rps',
+    title: 'RPS',
+    repoName: 'rps',
+    description: 'JavaScript web app experiment around game loops and user progression.',
+    category: 'experiment',
+    status: 'active',
+    language: 'JavaScript',
+    stack: ['JavaScript', 'React', 'Node.js', 'Express'],
+    repoUrl: `${github}/rps`,
+    updatedAt: '2026-03-28',
+    domain: 'Web Game',
+    highlights: ['Game loop', 'Progression systems', 'Interactive UI'],
+    lessonsLearned: ['Small games still need explicit state boundaries.'],
+    featured: false,
+  },
+  {
+    id: 'gems',
+    title: 'Gems',
+    repoName: 'Gems',
+    description: 'Minecraft mod with unique gem powers and configurable gameplay behavior.',
+    category: 'live',
+    status: 'active',
+    language: 'Java',
+    stack: ['Java', 'Fabric', 'Gradle', 'GameTest'],
+    repoUrl: `${github}/Gems`,
+    updatedAt: '2026-05-02',
+    domain: 'Game Systems',
+    highlights: ['Gem powers', 'Configurable balance', 'Fabric GameTest coverage'],
+    lessonsLearned: ['Mod features need configuration and testing from the start.'],
+    featured: false,
+  },
+  {
+    id: 'processor-simulation',
+    title: 'ProcessorSimulation',
+    repoName: 'ProcessorSimulation',
+    description: 'Simulated processor architecture with pipelining and hazards.',
+    category: 'university',
+    status: 'archived',
+    language: 'C',
+    stack: ['C', 'CPU architecture', 'Pipelining', 'Hazards'],
+    repoUrl: `${github}/ProcessorSimulation`,
+    updatedAt: '2024-12-10',
+    semester: 'Fall 2024',
+    course: 'Computer Architecture',
+    highlights: ['Cycle-accurate CPU simulator', 'Pipeline and hazard handling', 'Cache behavior profiling'],
+    lessonsLearned: ['CPU architecture fundamentals', 'Pipelining and hazard handling', 'Low-level performance profiling'],
+    featured: false,
+  },
+  {
+    id: 'chatting-application',
+    title: 'ChattingApplication',
+    repoName: 'ChattingApplication',
+    description: 'Internet/chatting project built around socket communication.',
+    category: 'university',
+    status: 'archived',
+    language: 'Python',
+    stack: ['Python', 'TCP sockets', 'Threading'],
+    repoUrl: `${github}/ChattingApplication`,
+    updatedAt: '2024-05-08',
+    semester: 'Spring 2024',
+    course: 'Networking / Chat App',
+    highlights: ['Concurrent socket chat', 'Client/server architecture', 'Message broadcast flow'],
+    lessonsLearned: ['Networking basics', 'Threaded server coordination', 'Graceful disconnect behavior'],
+    featured: false,
+  },
+  {
+    id: 'data-analysis',
+    title: 'DataAnalysis',
+    repoName: 'DataAnalysis',
+    description: 'Random signals and noise analysis with notebooks and statistical workflows.',
+    category: 'university',
+    status: 'archived',
+    language: 'Jupyter Notebook',
+    stack: ['Python', 'Pandas', 'NumPy', 'Matplotlib', 'Statistics'],
+    repoUrl: `${github}/DataAnalysis`,
+    updatedAt: '2024-11-16',
+    semester: 'Fall 2024',
+    course: 'Data Analysis / Signals & Noise',
+    highlights: ['EDA workflow', 'Signal/noise analysis', 'Classifier experiments'],
+    lessonsLearned: ['Readable notebook structure', 'Statistical validation', 'Comparing custom models to libraries'],
+    featured: false,
+  },
+  {
+    id: 'communication-theory',
+    title: 'CommunicationTheory',
+    repoName: 'CommunicationTheory',
+    description: 'Signal lifecycle from sampling to decoding and reconstruction.',
+    category: 'university',
+    status: 'archived',
+    language: 'MATLAB',
+    stack: ['MATLAB', 'Signal processing', 'Quantization', 'Huffman coding'],
+    repoUrl: `${github}/CommunicationTheory`,
+    updatedAt: '2024-04-24',
+    semester: 'Spring 2024',
+    course: 'Signals & Systems / Communications',
+    highlights: ['Sampling and quantization', 'Compression analysis', 'Signal reconstruction'],
+    lessonsLearned: ['End-to-end signal pipelines', 'Compression tradeoffs', 'Reconstruction quality metrics'],
+    featured: false,
+  },
+  {
+    id: 'channel-coding',
+    title: 'ChannelCoding',
+    repoName: 'ChannelCoding',
+    description: 'MATLAB project for digital communication and channel-coding simulations.',
+    category: 'university',
+    status: 'archived',
+    language: 'MATLAB',
+    stack: ['MATLAB', 'Channel coding', 'Viterbi decoding', 'BER analysis'],
+    repoUrl: `${github}/ChannelCoding`,
+    updatedAt: '2024-04-12',
+    semester: 'Spring 2024',
+    course: 'Digital Communications',
+    highlights: ['Incremental redundancy', 'BER/throughput analysis', 'Decoded output comparison'],
+    lessonsLearned: ['Error correction concepts', 'Throughput vs reliability', 'Simulation design'],
+    featured: false,
+  },
+  {
+    id: 'systems-and-control',
+    title: 'SystemsAndControl',
+    repoName: 'SystemsAndControl',
+    description: 'Systems and control project using transfer functions and state-space models.',
+    category: 'university',
+    status: 'archived',
+    language: 'MATLAB',
+    stack: ['MATLAB', 'Control systems', 'State-space', 'PID'],
+    repoUrl: `${github}/SystemsAndControl`,
+    updatedAt: '2023-12-18',
+    semester: 'Fall 2023',
+    course: 'Control Systems',
+    highlights: ['Dynamic system modeling', 'PID experiments', 'Response analysis'],
+    lessonsLearned: ['Modeling control loops', 'Stability analysis', 'Controller tuning'],
+    featured: false,
+  },
+  {
+    id: 'aes',
+    title: 'AES',
+    repoName: 'AES',
+    description: 'Rijndael AES implementation in Assembly for cryptography coursework.',
+    category: 'university',
+    status: 'archived',
+    language: 'Assembly',
+    stack: ['Assembly', 'AES-128', 'Cryptography'],
+    repoUrl: `${github}/AES`,
+    updatedAt: '2024-03-21',
+    semester: 'Spring 2024',
+    course: 'Cryptography',
+    highlights: ['AES-128 encryption', 'Key expansion', 'Round transformations'],
+    lessonsLearned: ['Cryptographic primitives', 'Low-level data movement', 'Readable assembly structure'],
+    featured: false,
+  },
+  {
+    id: 'pharmacy',
+    title: 'Pharmacy',
+    repoName: 'Pharmacy',
+    description: 'Mock pharmacy Android app with patient and pharmacist workflows.',
+    category: 'university',
+    status: 'archived',
+    language: 'Kotlin',
+    stack: ['Kotlin', 'Android', 'Firebase', 'Jetpack Compose'],
+    repoUrl: `${github}/Pharmacy`,
+    updatedAt: '2023-12-03',
+    semester: 'Fall 2023',
+    course: 'Android / Kotlin mock app',
+    highlights: ['Medication browsing', 'Role-based workflows', 'Firebase backend'],
+    lessonsLearned: ['Mobile data modeling', 'Role-based UI', 'Backend-backed Android flows'],
+    featured: false,
+  },
+];
+
+export const featuredProject = projects.find((project) => project.featured) ?? projects[0];
+export const liveProjectIds = ['portfolio', 'scheduler', 'typeshift', 'doompedia', 'ocpp-demo', 'anubis', 'commit'];
+export const liveProjects = liveProjectIds.map((id) => projects.find((project) => project.id === id)).filter(Boolean) as PortfolioProject[];
+export const universityProjects = projects.filter((project) => project.category === 'university');
+
+export function getProjectStats(projectList = projects) {
+  const active = projectList.filter((project) => project.status !== 'archived').length;
+  const archived = projectList.filter((project) => project.status === 'archived').length;
+  const knownLanguages = new Set([
+    'TypeScript',
+    'JavaScript',
+    'Python',
+    'Kotlin',
+    'Swift',
+    'CSS',
+    'HTML',
+    'Java',
+    'C',
+    'C++',
+    'MATLAB',
+    'Assembly',
+    'Jupyter Notebook',
+    'MDX',
+  ]);
+  const languageCounts = projectList.reduce<Record<string, number>>((counts, project) => {
+    const languages = [project.language, ...project.stack.filter((item) => knownLanguages.has(item))]
+      .filter((language, index, list) => list.indexOf(language) === index)
+      .slice(0, 3);
+
+    languages.forEach((language) => {
+      counts[language] = (counts[language] ?? 0) + 1;
+    });
+    return counts;
+  }, {});
+
+  return {
+    total: projectList.length,
+    active,
+    archived,
+    topLanguages: Object.entries(languageCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([language, count]) => ({ language, count })),
+  };
+}

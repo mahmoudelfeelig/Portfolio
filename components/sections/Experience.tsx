@@ -50,9 +50,9 @@ export default function Experience() {
               </Text>
               <Box w="100%" h="1px" bg="whiteAlpha.300" my={2} />
               <VStack align="start" gap={3}>
-                <Text color="gray.300">- Built and deployed desktop apps for windows and linux</Text>
-                <Text color="gray.300">- Developed Android apps with Kotlin</Text>
-                <Text color="gray.300">- Worked on network security tasks such as MDM, endpoint protection</Text>
+                <Text color="gray.300">Built and deployed desktop apps for Windows and Linux</Text>
+                <Text color="gray.300">Developed Android apps with Kotlin</Text>
+                <Text color="gray.300">Worked on network security tasks such as MDM and endpoint protection</Text>
               </VStack>
             </VStack>
           </Box>
@@ -86,10 +86,10 @@ export default function Experience() {
               </Text>
               <Box w="100%" h="1px" bg="whiteAlpha.300" my={2} />
               <VStack align="start" gap={3}>
-                <Text color="gray.300">- Built computer vision pipelines with YOLO for automotive data</Text>
-                <Text color="gray.300">- Built dashboards and internal tools with Next.js</Text>
-                <Text color="gray.300">- Prototyped iOS features in Swift for vision workflows</Text>
-                <Text color="gray.300">- Improved Python pipelines for faster analysis and processing</Text>
+                <Text color="gray.300">Built computer vision pipelines with YOLO for automotive data</Text>
+                <Text color="gray.300">Built dashboards and internal tools with Next.js</Text>
+                <Text color="gray.300">Prototyped iOS features in Swift for vision workflows</Text>
+                <Text color="gray.300">Improved Python pipelines for faster analysis and processing</Text>
               </VStack>
             </VStack>
           </Box>

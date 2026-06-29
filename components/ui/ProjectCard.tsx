@@ -79,7 +79,7 @@ export default function ProjectCard({
               gap={1}
               _hover={{ textDecoration: 'underline' }}
             >
-              Repository
+              GitHub
               <Icon as={ArrowTopRightOnSquareIcon} boxSize={4} />
             </Link>
           )}
@@ -117,9 +117,9 @@ export default function ProjectCard({
             <Text fontWeight="bold" fontSize="sm" mb={1} color="accentGreen">
               Tech Stack
             </Text>
-            <VStack align="start" pl={2} gap={1}>
+            <VStack align="start" gap={1}>
               {techStack.map(tech => (
-                <Text key={tech} fontSize="sm" color="gray.400">- {tech}</Text>
+                <Text key={tech} fontSize="sm" color="gray.400">{tech}</Text>
               ))}
             </VStack>
           </Box>
@@ -127,9 +127,9 @@ export default function ProjectCard({
             <Text fontWeight="bold" fontSize="sm" mt={2} mb={1} color="accentGreen">
               Features
             </Text>
-            <VStack align="start" pl={2} gap={1}>
+            <VStack align="start" gap={1}>
               {features.map(feature => (
-                <Text key={feature} fontSize="sm" color="gray.400">- {feature}</Text>
+                <Text key={feature} fontSize="sm" color="gray.400">{feature}</Text>
               ))}
             </VStack>
           </Box>

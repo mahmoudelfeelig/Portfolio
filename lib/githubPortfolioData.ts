@@ -17,6 +17,12 @@ type GithubContent = {
   type: 'file' | 'dir';
 };
 
+export type RepoLanguage = {
+  name: string;
+  bytes: number;
+  percent: number;
+};
+
 export type RepoView = {
   name: string;
   slug: string;
@@ -30,6 +36,8 @@ export type RepoView = {
   domain: string;
   techStack: string[];
   features: string[];
+  about: string;
+  languages: RepoLanguage[];
 };
 
 type CuratedRepoData = {
@@ -131,12 +139,13 @@ const CURATED_REPO_DATA: Record<string, CuratedRepoData> = {
     ],
   },
   Commit: {
-    domain: 'General',
-    techStack: ['Python', 'Git'],
+    domain: 'Product',
+    techStack: ['Python', 'JavaScript', 'CSS', 'HTML', 'localStorage', 'Git'],
     features: [
-      'Repository dedicated to generating custom GitHub commit history.',
-      'Used to maintain time-distributed commit activity over time.',
-      'Intentionally ships no application, library, or reusable runtime.',
+      'Browser-based GitHub contribution graph designer.',
+      'Paints contribution cells directly in the browser across single years or ranges.',
+      'Exports shell snippets of git commit commands for explicit review before running.',
+      'Stores graph designs locally with localStorage and includes a Python local runner.',
     ],
   },
   ChannelCoding: {
@@ -260,6 +269,40 @@ async function fetchReadme(repoName: string) {
   return response.text();
 }
 
+async function fetchLanguages(repoName: string, fallbackLanguage: string | null) {
+  const response = await fetch(`https://api.github.com/repos/${OWNER}/${repoName}/languages`, {
+    headers: githubHeaders(),
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    return fallbackLanguage ? [{ name: fallbackLanguage, bytes: 1, percent: 100 }] : [];
+  }
+
+  const byteCounts = (await response.json()) as Record<string, number>;
+  const total = Object.values(byteCounts).reduce((sum, bytes) => sum + bytes, 0);
+  if (!total) {
+    return fallbackLanguage ? [{ name: fallbackLanguage, bytes: 1, percent: 100 }] : [];
+  }
+
+  return Object.entries(byteCounts)
+    .sort(([, left], [, right]) => right - left)
+    .map(([name, bytes]) => ({
+      name,
+      bytes,
+      percent: Math.round((bytes / total) * 1000) / 10,
+    }));
+}
+
+function extractAbout(readme: string, fallback: string | null) {
+  const paragraph = readme
+    .split(/\n\s*\n/)
+    .map((block) => block.replace(/[#*`>_[\]]/g, '').replace(/\[(.*?)\]\(.*?\)/g, '$1').trim())
+    .find((block) => block.length >= 40 && !block.startsWith('!'));
+
+  return paragraph?.slice(0, 420) ?? fallback ?? 'Repository details are loaded from GitHub.';
+}
+
 function extractBulletFeatures(readme: string) {
   const bullets = readme
     .split('\n')
@@ -331,12 +374,11 @@ export async function fetchGithubRepos() {
   const mapped = await Promise.all(
     filtered.map(async (repo) => {
       const curated = CURATED_REPO_DATA[repo.name];
-      let rootItems: GithubContent[] = [];
-      let readme = '';
-
-      if (!curated) {
-        [rootItems, readme] = await Promise.all([fetchRootContents(repo.name), fetchReadme(repo.name)]);
-      }
+      const [rootItems, readme, languages] = await Promise.all([
+        curated ? Promise.resolve([] as GithubContent[]) : fetchRootContents(repo.name),
+        fetchReadme(repo.name),
+        fetchLanguages(repo.name, repo.language),
+      ]);
 
       const features = curated?.features ?? extractBulletFeatures(readme);
       const techStack = curated?.techStack ?? inferTechStack(repo.language, repo.topics ?? [], rootItems, readme);
@@ -355,6 +397,8 @@ export async function fetchGithubRepos() {
         domain,
         techStack,
         features: features.length > 0 ? features : ['Repository maintained with regular updates and clear structure.'],
+        about: extractAbout(readme, repo.description),
+        languages,
       } satisfies RepoView;
     }),
   );
