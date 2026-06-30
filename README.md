@@ -65,6 +65,26 @@ styles/
 
 The site will be live at `http://localhost:3000`.
 
+## Deployment
+
+This project targets Cloudflare Workers through OpenNext, not the deprecated
+`@cloudflare/next-on-pages` Pages adapter.
+
+```bash
+npm run build:cloudflare
+npm run deploy:cloudflare
+```
+
+Cloudflare configuration lives in:
+
+- `wrangler.jsonc`
+- `open-next.config.ts`
+- `next.config.ts`
+
+Do not use `npx @cloudflare/next-on-pages` or `.vercel/output/static` for this
+project; that setup is the old Pages build path and will not run the Next API
+route correctly.
+
 ## Preview
 
 - About: typing animation with highlighted keywords
@@ -82,4 +102,9 @@ GitHub: https://github.com/mahmoudelfeelig
 
 ## License
 
-MIT License
+Source code is licensed under the GNU Affero General Public License v3.0 or
+later (`AGPL-3.0-or-later`). See [LICENSE](./LICENSE).
+
+Personal assets, screenshots, demo videos, logos, CV/resume files, and other
+identity/portfolio media in `public/` are not licensed for reuse without
+explicit permission unless a file-specific notice says otherwise.

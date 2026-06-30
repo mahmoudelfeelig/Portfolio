@@ -100,7 +100,6 @@ const navItems = [
   { label: 'About', icon: UserRound, target: 'about' },
   { label: 'Academic', icon: BookOpen, target: 'university' },
   { label: 'Repositories', icon: Github, target: 'repo-network' },
-  { label: 'Contact', icon: MessageCircle, target: 'contact' },
 ];
 
 const taskbarItems = [
@@ -108,6 +107,7 @@ const taskbarItems = [
   { label: 'Repo Network', icon: GitBranch, href: '#repo-network', projectId: 'portfolio', app: 'graph' as ActiveAppWindow },
   { label: 'Terminal', icon: Terminal, href: '#terminal', projectId: 'portfolio', app: 'terminal' as ActiveAppWindow },
   { label: 'CV', icon: FileText, href: '#resume', projectId: 'portfolio', app: 'resume' as ActiveAppWindow },
+  { label: 'Contact', icon: MessageCircle, href: '#contact', projectId: 'portfolio', app: 'contact' as ActiveAppWindow },
 ];
 
 const modeProjectIds: Record<Mode, string[]> = {
@@ -901,7 +901,7 @@ export default function WorkspaceOS() {
             </button>
           ))}
         </div>
-        <button type="button" className={styles.profile} onClick={() => handleNav('contact')}>
+        <button type="button" className={styles.profile} onClick={() => handleNav('about')}>
           <span className={styles.avatar}><img src="/Logo-transparent.png" alt="" /></span>
           <span>
             <strong>Mahmoud Elfeel</strong>
@@ -1349,9 +1349,9 @@ export default function WorkspaceOS() {
                       ))}
                     </div>
                     <div className={styles.terminalCommands}>
-                      <button type="button" onClick={() => openApp('projects')}>open projects</button>
-                      <button type="button" onClick={() => openApp('graph')}>open repo network</button>
-                      <button type="button" onClick={() => setRepoFilter('archived')}>show archived</button>
+                      <button type="button" onClick={() => runTerminalCommand('projects')}>projects</button>
+                      <button type="button" onClick={() => runTerminalCommand('graph')}>graph</button>
+                      <button type="button" onClick={() => runTerminalCommand('filter archived')}>filter archived</button>
                     </div>
                     <form
                       className={styles.terminalForm}
