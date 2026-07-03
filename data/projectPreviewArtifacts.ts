@@ -74,13 +74,13 @@ export const previewArtifacts: Record<string, PreviewArtifact> = {
   doompedia: {
     projectId: 'doompedia',
     source: 'screenshot',
-    generatedAt: '2026-06-28',
-    title: 'doompedia mobile',
-    summary: 'Android browse screen with cached biography cards.',
-    states: ['Search', 'Cached cards', 'Bottom navigation'],
+    generatedAt: '2026-07-04',
+    title: 'Doompedia discovery',
+    summary: 'The live discovery surface, topic filters, offline-friendly cards, and article summaries.',
+    states: ['Topic filters', 'Article cards', 'Summary modal'],
     screenshot: {
       kind: 'image',
-      alt: 'doompedia Android screen showing searchable cached article cards.',
+      alt: 'Doompedia web app showing its article discovery feed and topic filters.',
       path: '/project-previews/Doompedia.png',
     },
     video: {
@@ -131,13 +131,13 @@ export const previewArtifacts: Record<string, PreviewArtifact> = {
   anubis: {
     projectId: 'anubis',
     source: 'screenshot',
-    generatedAt: '2026-06-28',
-    title: 'Anubis progression',
-    summary: 'Puzzle progression, content state, and the product interface used to move through the experience.',
-    states: ['Puzzle state', 'Progression', 'Content flow'],
+    generatedAt: '2026-07-04',
+    title: 'Anubis signal archive',
+    summary: 'The live analog-horror interface, viewing notes, and hand-authored puzzle world.',
+    states: ['Signal archive', 'Viewing notes', 'Puzzle world'],
     screenshot: {
       kind: 'image',
-      alt: 'Anubis product interface showing its puzzle and progression experience.',
+      alt: 'Anubis live site showing its analog-horror project interface.',
       path: '/project-previews/Anubis.png',
     },
     video: {
@@ -145,6 +145,44 @@ export const previewArtifacts: Record<string, PreviewArtifact> = {
         { src: '/project-previews/videos/anubis.mp4', type: 'video/mp4' },
       ],
       poster: '/project-previews/Anubis.png',
+    },
+  },
+  bachelor: {
+    projectId: 'bachelor',
+    source: 'screenshot',
+    generatedAt: '2026-07-04',
+    title: 'MANTA research prototype',
+    summary: 'Bachelor thesis site with the working Android monitor, evidence, and metadata-only threat model.',
+    states: ['Research question', 'Android prototype', 'Interactive evidence'],
+    screenshot: {
+      kind: 'image',
+      alt: 'MANTA bachelor thesis site showing the Android network threat detection prototype.',
+      path: '/project-previews/Bachelor.png',
+    },
+    video: {
+      sources: [
+        { src: '/project-previews/videos/bachelor.mp4', type: 'video/mp4' },
+      ],
+      poster: '/project-previews/Bachelor.png',
+    },
+  },
+  tariffguard: {
+    projectId: 'tariffguard',
+    source: 'screenshot',
+    generatedAt: '2026-07-04',
+    title: 'TariffGuard operations',
+    summary: 'Tariff validation dashboard with session workflows, alert triage, and daily audit reporting.',
+    states: ['Session operations', 'Alert board', 'Daily audit'],
+    screenshot: {
+      kind: 'image',
+      alt: 'TariffGuard dashboard showing a daily EV charging tariff audit.',
+      path: '/project-previews/TariffGuard.png',
+    },
+    video: {
+      sources: [
+        { src: '/project-previews/videos/tariffguard.mp4', type: 'video/mp4' },
+      ],
+      poster: '/project-previews/TariffGuard.png',
     },
   },
   rps: {

@@ -92,7 +92,7 @@ function clampWindowPosition(position: { x: number; y: number }) {
   };
 }
 
-const FEATURED_PROJECT_IDS = ['portfolio', 'scheduler', 'typeshift', 'doompedia', 'ocpp-demo', 'anubis', 'commit'];
+const FEATURED_PROJECT_IDS = ['portfolio', 'scheduler', 'typeshift', 'doompedia', 'ocpp-demo', 'anubis', 'bachelor', 'tariffguard', 'commit'];
 const MAX_WORKSPACES = 4;
 const modes: Mode[] = ['All', 'Full-stack', 'Security', 'Mobile'];
 const navItems = [
@@ -112,9 +112,9 @@ const taskbarItems = [
 
 const modeProjectIds: Record<Mode, string[]> = {
   All: FEATURED_PROJECT_IDS,
-  'Full-stack': ['portfolio', 'scheduler', 'typeshift', 'commit', 'anubis', 'ocpp-demo'],
-  Security: ['ocpp-demo','typeshift'],
-  Mobile: ['doompedia'],
+  'Full-stack': ['portfolio', 'scheduler', 'typeshift', 'commit', 'anubis', 'ocpp-demo', 'tariffguard'],
+  Security: ['ocpp-demo', 'typeshift', 'bachelor', 'tariffguard'],
+  Mobile: ['doompedia', 'bachelor'],
 };
 
 const modeDescriptions: Record<Mode, string> = {
@@ -131,6 +131,8 @@ const fallbackProjectLanguages: Record<string, string[]> = {
   doompedia: ['Kotlin', 'Swift', 'Python'],
   'ocpp-demo': ['Python', 'TypeScript', 'CSS'],
   anubis: ['TypeScript', 'MDX', 'CSS'],
+  bachelor: ['Python', 'Kotlin', 'TypeScript'],
+  tariffguard: ['TypeScript', 'Python', 'HCL'],
   commit: ['Python', 'JavaScript', 'CSS'],
   rps: ['JavaScript', 'CSS', 'HTML'],
   pharmacy: ['Kotlin', 'Java'],
@@ -220,8 +222,22 @@ function ShortcutHint({ device }: { device: DeviceKind }) {
   );
 }
 
+function findGithubRepo(project: PortfolioProject, githubRepos: RepoView[]) {
+  const projectRepoUrl = project.repoUrl.toLowerCase();
+  const projectRepoName = project.repoName.toLowerCase();
+
+  return githubRepos.find((repo) => repo.url.toLowerCase() === projectRepoUrl)
+    ?? githubRepos.find((repo) => (repo.fullName ?? repo.name).toLowerCase().endsWith(`/${projectRepoName}`))
+    ?? githubRepos.find((repo) => repo.name.toLowerCase() === projectRepoName);
+}
+
+function getProjectUpdatedAt(project: PortfolioProject, githubRepos: RepoView[]) {
+  const githubRepo = findGithubRepo(project, githubRepos);
+  return githubRepo?.pushedAt ?? githubRepo?.updatedAt ?? project.updatedAt;
+}
+
 function getProjectLanguages(project: PortfolioProject, githubRepos: RepoView[]) {
-  const githubLanguages = githubRepos.find((repo) => repo.name.toLowerCase() === project.repoName.toLowerCase())?.languages.slice(0, 3);
+  const githubLanguages = findGithubRepo(project, githubRepos)?.languages.slice(0, 3);
   if (githubLanguages?.length) {
     const total = githubLanguages.reduce((sum, language) => sum + language.bytes, 0);
     return githubLanguages.map((language) => ({
@@ -452,7 +468,18 @@ export default function WorkspaceOS() {
   const [trayOpen, setTrayOpen] = useState(false);
   const [githubRepos, setGithubRepos] = useState<RepoView[]>([]);
   const [activeNav, setActiveNav] = useState('featured');
+  const [emailCopied, setEmailCopied] = useState(false);
   const stats = getProjectStats();
+
+  const copyEmail = () => {
+    navigator.clipboard?.writeText('mahmoudelfeelig@gmail.com').then(
+      () => {
+        setEmailCopied(true);
+        window.setTimeout(() => setEmailCopied(false), 2200);
+      },
+      () => setEmailCopied(false),
+    );
+  };
 
   useEffect(() => {
     setDevice(detectDevice());
@@ -996,7 +1023,7 @@ export default function WorkspaceOS() {
                 <small>{project.domain}</small>
                 <p>{project.description}</p>
                 <span className={styles.cardMeta}>
-                  <CalendarDays size={13} /> Last updated {formatDate(project.updatedAt)}
+                  <CalendarDays size={13} /> Last updated {formatDate(getProjectUpdatedAt(project, githubRepos))}
                 </span>
                 <ProjectLanguages project={project} githubRepos={githubRepos} />
                 <LiveCardPreview project={project} />
@@ -1014,9 +1041,11 @@ export default function WorkspaceOS() {
 
         <section className={styles.featured} id="featured" aria-labelledby="featured-title">
           <div className={styles.featuredCopy}>
-            <span className={styles.featuredMeta}>Last updated {formatDate(selectedProject.updatedAt)}</span>
+            <span className={styles.featuredMeta}>Last updated {formatDate(getProjectUpdatedAt(selectedProject, githubRepos))}</span>
             <h2 id="featured-title">{selectedProject.id === 'scheduler' ? 'Planora' : selectedProject.title}</h2>
-            <a href={selectedProject.liveUrl ?? selectedProject.repoUrl}>{selectedProject.domain ?? selectedProject.repoName}</a>
+            <a href={selectedProject.liveUrl ?? selectedProject.repoUrl} target="_blank" rel="noreferrer">
+              {selectedProject.domain ?? selectedProject.repoName}
+            </a>
             <p>{selectedProject.description}</p>
             <ProjectLanguages project={selectedProject} githubRepos={githubRepos} detailed />
             <div className={styles.featuredActions}>
@@ -1243,12 +1272,12 @@ export default function WorkspaceOS() {
         </div>
         <div className={styles.trayWrap}>
           {trayOpen && (
-            <div className={styles.tray} id="contact">
+            <div className={styles.tray}>
               <a href="https://github.com/mahmoudelfeelig" target="_blank" rel="noreferrer">
                 <Github size={17} /> GitHub
               </a>
-              <a href="mailto:mahmoudelfeelig@gmail.com">
-                <Mail size={17} /> Email
+              <a href="mailto:mahmoudelfeelig@gmail.com" onClick={copyEmail}>
+                <Mail size={17} /> {emailCopied ? 'Email copied' : 'Email'}
               </a>
               <a href="https://www.linkedin.com/in/mahmoudelfeel" target="_blank" rel="noreferrer">
                 <Network size={17} /> LinkedIn
@@ -1266,7 +1295,12 @@ export default function WorkspaceOS() {
 
       <section className={styles.siteFooter} id="contact" aria-label="Portfolio footer">
         <strong><img src="/Logo-transparent.png" alt="" /> Mahmoud Elfeel</strong>
-        <span>Reachable by email, LinkedIn, or GitHub.</span>
+        <span className={styles.footerReachability}>
+          Reachable by{' '}
+          <a href="mailto:mahmoudelfeelig@gmail.com" onClick={copyEmail}>email</a>,{' '}
+          <a href="https://www.linkedin.com/in/mahmoudelfeel" target="_blank" rel="noreferrer">LinkedIn</a>, or{' '}
+          <a href="https://github.com/mahmoudelfeelig" target="_blank" rel="noreferrer">GitHub</a>.
+        </span>
       </section>
 
       {windows
@@ -1393,7 +1427,9 @@ export default function WorkspaceOS() {
                 )}
                 {openWindow === 'contact' && (
                   <div className={styles.contactApp}>
-                    <a href="mailto:mahmoudelfeelig@gmail.com"><Mail size={17} /> Email</a>
+                    <a href="mailto:mahmoudelfeelig@gmail.com" onClick={copyEmail}>
+                      <Mail size={17} /> {emailCopied ? 'Email copied' : 'Email'}
+                    </a>
                     <a href="https://github.com/mahmoudelfeelig" target="_blank" rel="noreferrer"><Github size={17} /> GitHub</a>
                     <a href="https://www.linkedin.com/in/mahmoudelfeel" target="_blank" rel="noreferrer"><Network size={17} /> LinkedIn</a>
                   </div>

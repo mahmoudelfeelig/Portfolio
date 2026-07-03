@@ -1,7 +1,12 @@
 const OWNER = 'mahmoudelfeelig';
 
+const EXTERNAL_REPOS = [
+  { owner: 'Resistine', name: 'feel-bachelor' },
+];
+
 type GithubRepo = {
   name: string;
+  full_name: string;
   html_url: string;
   description: string | null;
   language: string | null;
@@ -17,6 +22,11 @@ type GithubContent = {
   type: 'file' | 'dir';
 };
 
+type GithubRepoRef = {
+  owner: string;
+  name: string;
+};
+
 export type RepoLanguage = {
   name: string;
   bytes: number;
@@ -25,6 +35,7 @@ export type RepoLanguage = {
 
 export type RepoView = {
   name: string;
+  fullName: string;
   slug: string;
   url: string;
   description: string | null;
@@ -48,6 +59,16 @@ type CuratedRepoData = {
 
 // Curated from the current public README files on GitHub as of 2026-04-11.
 const CURATED_REPO_DATA: Record<string, CuratedRepoData> = {
+  'Resistine/feel-bachelor': {
+    domain: 'Mobile',
+    techStack: ['Python', 'Kotlin', 'TypeScript', 'Computer Vision', 'Mobile ML'],
+    features: [
+      'Bachelor project centered on mobile-assisted visual recognition.',
+      'Combines model-side experimentation with application-facing workflows.',
+      'Repository data is loaded directly from the external GitHub repo.',
+      'Demo experience is surfaced in the portfolio featured workspace.',
+    ],
+  },
   Anubis: {
     domain: 'Product',
     techStack: ['Next.js 16', 'React 19', 'TypeScript', 'MongoDB', 'Cloudinary', 'Vitest'],
@@ -231,6 +252,22 @@ function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+function repoApiBase({ owner, name }: GithubRepoRef) {
+  return `https://api.github.com/repos/${owner}/${name}`;
+}
+
+function repoRefFromRepo(repo: GithubRepo): GithubRepoRef {
+  const [owner, name] = repo.full_name?.split('/') ?? [];
+  return {
+    owner: owner || OWNER,
+    name: name || repo.name,
+  };
+}
+
+function curatedDataFor(repo: GithubRepo) {
+  return CURATED_REPO_DATA[repo.full_name] ?? CURATED_REPO_DATA[repo.name];
+}
+
 function toTitle(value: string) {
   return value
     .replace(/[-_]/g, ' ')
@@ -239,8 +276,8 @@ function toTitle(value: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-async function fetchRootContents(repoName: string) {
-  const response = await fetch(`https://api.github.com/repos/${OWNER}/${repoName}/contents`, {
+async function fetchRootContents(repoRef: GithubRepoRef) {
+  const response = await fetch(`${repoApiBase(repoRef)}/contents`, {
     headers: githubHeaders(),
     next: { revalidate: 3600 },
   });
@@ -253,8 +290,8 @@ async function fetchRootContents(repoName: string) {
   return Array.isArray(data) ? data : [];
 }
 
-async function fetchReadme(repoName: string) {
-  const response = await fetch(`https://api.github.com/repos/${OWNER}/${repoName}/readme`, {
+async function fetchReadme(repoRef: GithubRepoRef) {
+  const response = await fetch(`${repoApiBase(repoRef)}/readme`, {
     headers: {
       ...githubHeaders(),
       Accept: 'application/vnd.github.raw+json',
@@ -269,8 +306,8 @@ async function fetchReadme(repoName: string) {
   return response.text();
 }
 
-async function fetchLanguages(repoName: string, fallbackLanguage: string | null) {
-  const response = await fetch(`https://api.github.com/repos/${OWNER}/${repoName}/languages`, {
+async function fetchLanguages(repoRef: GithubRepoRef, fallbackLanguage: string | null) {
+  const response = await fetch(`${repoApiBase(repoRef)}/languages`, {
     headers: githubHeaders(),
     next: { revalidate: 3600 },
   });
@@ -368,16 +405,40 @@ export async function fetchGithubRepos() {
     throw new Error('Failed to fetch repositories from GitHub');
   }
 
-  const repos = (await response.json()) as GithubRepo[];
-  const filtered = repos.filter((repo) => !repo.name.toLowerCase().includes('.github'));
+  const primaryRepos = (await response.json()) as GithubRepo[];
+  const externalRepos = (
+    await Promise.all(
+      EXTERNAL_REPOS.map(async (repoRef) => {
+        const externalResponse = await fetch(repoApiBase(repoRef), {
+          headers: githubHeaders(),
+          next: { revalidate: 3600 },
+        });
+
+        if (!externalResponse.ok) {
+          return null;
+        }
+
+        return (await externalResponse.json()) as GithubRepo;
+      }),
+    )
+  ).filter((repo): repo is GithubRepo => Boolean(repo));
+
+  const seenRepos = new Set<string>();
+  const filtered = [...primaryRepos, ...externalRepos].filter((repo) => {
+    const repoKey = (repo.full_name || repo.name).toLowerCase();
+    if (repo.name.toLowerCase().includes('.github') || seenRepos.has(repoKey)) return false;
+    seenRepos.add(repoKey);
+    return true;
+  });
 
   const mapped = await Promise.all(
     filtered.map(async (repo) => {
-      const curated = CURATED_REPO_DATA[repo.name];
+      const repoRef = repoRefFromRepo(repo);
+      const curated = curatedDataFor(repo);
       const [rootItems, readme, languages] = await Promise.all([
-        curated ? Promise.resolve([] as GithubContent[]) : fetchRootContents(repo.name),
-        fetchReadme(repo.name),
-        fetchLanguages(repo.name, repo.language),
+        curated ? Promise.resolve([] as GithubContent[]) : fetchRootContents(repoRef),
+        fetchReadme(repoRef),
+        fetchLanguages(repoRef, repo.language),
       ]);
 
       const features = curated?.features ?? extractBulletFeatures(readme);
@@ -386,6 +447,7 @@ export async function fetchGithubRepos() {
 
       return {
         name: repo.name,
+        fullName: repo.full_name || `${repoRef.owner}/${repoRef.name}`,
         slug: slugify(repo.name),
         url: repo.html_url,
         description: repo.description,

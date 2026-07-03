@@ -1,6 +1,26 @@
 'use client';
 
-import { ExternalLink } from 'lucide-react';
+import {
+  Activity,
+  BookOpen,
+  CalendarDays,
+  Code2,
+  Cpu,
+  ExternalLink,
+  Gem,
+  GitCommitHorizontal,
+  GraduationCap,
+  Keyboard,
+  Layers,
+  MessageSquare,
+  Pill,
+  PlugZap,
+  Puzzle,
+  Radio,
+  ShieldCheck,
+  Smartphone,
+  type LucideIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import type { RepoView } from '../../lib/githubPortfolioData';
@@ -55,6 +75,8 @@ const fallbackLanguages: Record<string, string[]> = {
   doompedia: ['Kotlin', 'Swift', 'Python'],
   'ocpp-demo': ['Python', 'TypeScript', 'CSS'],
   anubis: ['TypeScript', 'MDX', 'CSS'],
+  bachelor: ['Python', 'Kotlin', 'TypeScript'],
+  tariffguard: ['TypeScript', 'Python', 'HCL'],
   commit: ['Python', 'JavaScript', 'CSS'],
   rps: ['JavaScript', 'CSS', 'HTML'],
   pharmacy: ['Kotlin', 'Java'],
@@ -69,8 +91,8 @@ const groupCenters: Record<ProjectGroup, { x: number; y: number }> = {
 };
 
 function groupFor(project: PortfolioProject): ProjectGroup {
-  if (['doompedia', 'pharmacy'].includes(project.id)) return 'mobile';
-  if (['ocpp-demo', 'aes', 'chatting-application'].includes(project.id)) return 'security';
+  if (['doompedia', 'pharmacy', 'bachelor'].includes(project.id)) return 'mobile';
+  if (['ocpp-demo', 'aes', 'chatting-application', 'tariffguard'].includes(project.id)) return 'security';
   if (['portfolio', 'scheduler', 'typeshift', 'anubis', 'rps', 'commit'].includes(project.id)) return 'fullstack';
   return 'academic';
 }
@@ -110,6 +132,7 @@ function fallbackRepo(project: PortfolioProject): RepoView {
   const names = fallbackLanguages[project.id] ?? [project.language];
   return {
     name: project.repoName,
+    fullName: project.repoUrl.replace(/^https:\/\/github\.com\//, ''),
     slug: project.id,
     url: project.repoUrl,
     description: project.description,
@@ -130,28 +153,65 @@ function fallbackRepo(project: PortfolioProject): RepoView {
   };
 }
 
+function findGithubRepo(project: PortfolioProject, githubRepos: RepoView[]) {
+  const projectRepoUrl = project.repoUrl.toLowerCase();
+  const projectRepoName = project.repoName.toLowerCase();
+
+  return githubRepos.find((repo) => repo.url.toLowerCase() === projectRepoUrl)
+    ?? githubRepos.find((repo) => (repo.fullName ?? repo.name).toLowerCase().endsWith(`/${projectRepoName}`))
+    ?? githubRepos.find((repo) => repo.name.toLowerCase() === projectRepoName);
+}
+
+const projectIcons: Record<string, LucideIcon> = {
+  portfolio: Layers,
+  scheduler: CalendarDays,
+  typeshift: Keyboard,
+  doompedia: BookOpen,
+  'ocpp-demo': PlugZap,
+  anubis: Puzzle,
+  bachelor: Smartphone,
+  tariffguard: ShieldCheck,
+  commit: GitCommitHorizontal,
+  rps: Activity,
+  gems: Gem,
+  'processor-simulation': Cpu,
+  'chatting-application': MessageSquare,
+  'data-analysis': Activity,
+  'communication-theory': Radio,
+  'channel-coding': Radio,
+  'systems-and-control': Activity,
+  aes: ShieldCheck,
+  pharmacy: Pill,
+};
+
 function nodeShape(node: PositionedProject, selected: boolean) {
   const className = `${styles.networkNodeShape} ${selected ? styles.networkNodeSelected : ''}`;
   const nodeColor = languageColors[node.primaryLanguage] ?? '#8b949e';
-  if (node.group === 'security') {
-    return <polygon className={className} style={{ '--node-color': nodeColor } as CSSProperties} points="-17,0 0,-17 17,0 0,17" />;
-  }
-  if (node.group === 'mobile') {
-    return <circle className={className} style={{ '--node-color': nodeColor } as CSSProperties} r={node.radius} />;
-  }
-  if (node.group === 'academic') {
-    return <polygon className={className} style={{ '--node-color': nodeColor } as CSSProperties} points="-16,-9 0,-18 16,-9 16,9 0,18 -16,9" />;
-  }
-  return <rect className={className} style={{ '--node-color': nodeColor } as CSSProperties} x="-17" y="-17" width="34" height="34" rx="6" />;
+  const Icon = projectIcons[node.project.id] ?? (node.group === 'academic' ? GraduationCap : Code2);
+
+  return (
+    <g className={styles.networkNodeSymbol} style={{ '--node-color': nodeColor } as CSSProperties}>
+      <circle className={styles.networkNodeHalo} r={node.radius + 9} />
+      {node.group === 'security' ? (
+        <polygon className={className} points="-20,-12 0,-23 20,-12 20,12 0,23 -20,12" />
+      ) : node.group === 'mobile' ? (
+        <rect className={className} x="-17" y="-23" width="34" height="46" rx="9" />
+      ) : node.group === 'academic' ? (
+        <polygon className={className} points="0,-23 22,0 0,23 -22,0" />
+      ) : (
+        <circle className={className} r="21" />
+      )}
+      <Icon className={styles.networkNodeGlyph} x={-10} y={-10} width={20} height={20} strokeWidth={1.9} />
+      <circle className={styles.networkNodePulse} cx="14" cy="-15" r="3" />
+    </g>
+  );
 }
 
 export function RepoNetwork({ githubRepos, selectedId, onSelect }: RepoNetworkProps) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [panState, setPanState] = useState<PanState | null>(null);
   const selectedProject = projects.find((project) => project.id === selectedId) ?? projects[0];
-  const githubRepo =
-    githubRepos.find((repo) => repo.name.toLowerCase() === selectedProject.repoName.toLowerCase()) ??
-    fallbackRepo(selectedProject);
+  const githubRepo = findGithubRepo(selectedProject, githubRepos) ?? fallbackRepo(selectedProject);
   const languages = githubRepo.languages.slice(0, 6);
 
   return (
@@ -220,7 +280,7 @@ export function RepoNetwork({ githubRepos, selectedId, onSelect }: RepoNetworkPr
                 }}
               >
                 {nodeShape(node, node.project.id === selectedProject.id)}
-                <text y="32">{node.project.title}</text>
+                <text y="40">{node.project.title}</text>
               </g>
             ))}
           </g>
@@ -258,9 +318,16 @@ export function RepoNetwork({ githubRepos, selectedId, onSelect }: RepoNetworkPr
           </section>
         ) : null}
 
-        <a href={githubRepo.url} target="_blank" rel="noreferrer">
-          Open repository <ExternalLink size={14} />
-        </a>
+        <div className={styles.networkInspectorActions}>
+          {selectedProject.liveUrl ? (
+            <a className={styles.networkLiveLink} href={selectedProject.liveUrl} target="_blank" rel="noreferrer">
+              Open live demo <ExternalLink size={14} />
+            </a>
+          ) : null}
+          <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer">
+            Open repository <ExternalLink size={14} />
+          </a>
+        </div>
       </aside>
     </div>
   );
