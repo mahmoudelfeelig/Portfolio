@@ -93,7 +93,7 @@ tracking-code screen, and set:
 
 ```bash
 NEXT_PUBLIC_UMAMI_WEBSITE_ID=00000000-0000-0000-0000-000000000000
-NEXT_PUBLIC_UMAMI_SCRIPT_SRC=https://cloud.umami.is/script.js
+NEXT_PUBLIC_UMAMI_SCRIPT_SRC=/telemetry/script.js
 ```
 
 The integration records normal pageviews and a `Project Opened` custom event

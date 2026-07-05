@@ -20,8 +20,15 @@
     radial-gradient(circle at 12% 18%, rgba(23, 209, 137, 0.08), transparent 26%),
     linear-gradient(180deg, #02050a 0%, #06101b 58%, #02060c 100%);
   overflow-x: hidden;
-  padding: 68px 28px 220px 154px;
+  padding: 68px 28px 194px;
   position: relative;
+}
+
+.os,
+.os *,
+.os *::before,
+.os *::after {
+  box-sizing: border-box;
 }
 
 .os::before {
@@ -301,6 +308,12 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebarNav {
@@ -329,7 +342,7 @@
 
 .sidebarNav button {
   border: 0;
-  min-height: 76px;
+  min-height: clamp(52px, 8vh, 76px);
   border-radius: 8px;
   display: grid;
   place-items: center;
@@ -393,15 +406,31 @@
 .workspace {
   position: relative;
   z-index: 2;
+  min-width: 0;
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
   display: grid;
-  grid-template-columns: minmax(720px, 1fr) minmax(360px, 420px);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "title right"
-    "live right"
-    "featured right"
-    "about right"
-    "university right";
+    "title"
+    "live"
+    "featured"
+    "about"
+    "university";
   gap: 12px 22px;
+}
+
+.rightRail,
+.siteFooter {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+}
+
+.workspace > *,
+.rightRail > * {
+  min-width: 0;
 }
 
 .liveGrid,
@@ -622,6 +651,9 @@
   gap: 7px;
   cursor: pointer;
   overflow: hidden;
+  animation: none;
+  backdrop-filter: none;
+  isolation: isolate;
   transition:
     border-color 180ms ease,
     background 220ms ease,
@@ -1594,6 +1626,7 @@
 .rightRail {
   grid-area: right;
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   align-content: start;
 }
@@ -1775,10 +1808,37 @@
   margin-top: 18px;
   border-radius: 10px;
   padding: 18px 20px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
   gap: 16px;
   color: #c8d7e8;
+}
+
+.footerPrivacy {
+  justify-self: center;
+  min-height: 34px;
+  border: 1px solid rgba(128, 169, 205, 0.24);
+  border-radius: 7px;
+  padding: 0 12px;
+  color: #b9c6d5;
+  background: rgba(45, 140, 255, 0.08);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.footerPrivacy:hover,
+.footerPrivacy:focus-visible {
+  color: #fff;
+  border-color: rgba(125, 211, 252, 0.68);
+  background: rgba(45, 140, 255, 0.18);
+  outline: none;
+}
+
+.footerReachability {
+  justify-self: end;
+  text-align: right;
 }
 
 .siteFooter strong {
@@ -2597,14 +2657,13 @@
   border-radius: 14px;
   padding: 12px 14px;
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) auto auto minmax(260px, auto) auto;
+  grid-template-columns: auto minmax(160px, 1fr) minmax(260px, auto) auto;
   gap: 13px;
   align-items: center;
 }
 
 .taskbar nav,
 .workspaceSwitch,
-.compactStats,
 .modeSwitch {
   display: flex;
   gap: 8px;
@@ -2665,6 +2724,7 @@
 
 .workspaceSwitch {
   max-width: 340px;
+  justify-self: center;
   overflow-x: auto;
   scrollbar-width: thin;
 }
@@ -2678,24 +2738,6 @@
 .workspaceSwitch button:disabled {
   cursor: not-allowed;
   opacity: 0.4;
-}
-
-.compactStats {
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  padding-left: 13px;
-}
-
-.compactStats span {
-  min-width: 62px;
-  color: var(--muted);
-  text-align: center;
-  font-size: 12px;
-}
-
-.compactStats strong {
-  display: block;
-  color: var(--green);
-  font-size: 17px;
 }
 
 .modeSwitch {
@@ -2798,7 +2840,7 @@
 
 @media (max-width: 1480px) {
   .os {
-    padding-left: 128px;
+    padding-left: 28px;
   }
 
   .workspace {
@@ -2809,12 +2851,7 @@
       "live"
       "featured"
       "about"
-      "right"
       "university";
-  }
-
-  .rightRail {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .cardGrid {
@@ -2825,16 +2862,19 @@
     grid-template-columns: auto minmax(150px, 1fr) auto auto;
   }
 
-  .compactStats {
-    display: none;
-  }
-
   .workspaceSwitch {
     max-width: 240px;
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1400px) {
+  .sidebar,
+  .brand {
+    display: none;
+  }
+}
+
+@media (max-width: 1240px) {
   .topbar {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2844,6 +2884,10 @@
   }
 
   .sidebar {
+    display: none;
+  }
+
+  .brand {
     display: none;
   }
 
@@ -2910,6 +2954,17 @@
 
   .workspaceProjectPicker {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .taskbar nav span {
+    display: none;
+  }
+
+  .taskbar nav a {
+    width: 42px;
+    padding: 0;
   }
 }
 
@@ -3001,14 +3056,20 @@
   }
 
   .siteFooter {
+    grid-template-columns: 1fr;
     align-items: center;
-    flex-direction: column;
+    justify-items: center;
     text-align: center;
   }
 
   .siteFooter span {
     max-width: 34ch;
     line-height: 1.45;
+  }
+
+  .footerReachability {
+    justify-self: center;
+    text-align: center;
   }
 
   .recursiveStatus > span:last-child small {
@@ -3081,6 +3142,28 @@
 
   .networkApp:fullscreen .networkInspector {
     display: none;
+  }
+}
+
+@media (max-width: 340px) {
+  .taskbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .workspaceSwitch {
+    display: none;
+  }
+}
+
+@media (max-height: 600px) and (min-width: 721px) {
+  .os {
+    padding-bottom: 150px;
+  }
+
+  .taskbar {
+    bottom: 10px;
+    min-height: 64px;
+    padding-block: 8px;
   }
 }
 

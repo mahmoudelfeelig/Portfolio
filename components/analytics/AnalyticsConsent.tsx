@@ -11,13 +11,14 @@ const STORAGE_KEY = "elfeel-analytics-consent";
 export default function AnalyticsConsent() {
   const scriptSrc =
     process.env.NEXT_PUBLIC_UMAMI_SCRIPT_SRC ??
-    "https://cloud.umami.is/script.js";
+    "/telemetry/script.js";
   const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
   const [consent, setConsent] = useState<ConsentState>(null);
   const [ready, setReady] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
+    const openSettings = () => setSettingsOpen(true);
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored === "accepted" || stored === "declined") {
       setConsent(stored);
@@ -25,6 +26,9 @@ export default function AnalyticsConsent() {
       setSettingsOpen(true);
     }
     setReady(true);
+    window.addEventListener("elfeel:open-privacy-settings", openSettings);
+    return () =>
+      window.removeEventListener("elfeel:open-privacy-settings", openSettings);
   }, []);
 
   const saveConsent = (nextConsent: Exclude<ConsentState, null>) => {
@@ -46,21 +50,13 @@ export default function AnalyticsConsent() {
         <Script
           src={scriptSrc}
           data-website-id={websiteId}
+          data-host-url="/telemetry"
           data-domains="elfeel.me,www.elfeel.me"
-          data-do-not-track="true"
           data-exclude-search="true"
           data-performance="true"
           strategy="afterInteractive"
         />
       ) : null}
-
-      <button
-        type="button"
-        className={styles.settingsButton}
-        onClick={() => setSettingsOpen(true)}
-      >
-        Privacy settings
-      </button>
 
       {settingsOpen ? (
         <div className={styles.backdrop}>

@@ -1291,17 +1291,6 @@ export default function WorkspaceOS() {
             <Plus size={16} />
           </button>
         </div>
-        <div className={styles.compactStats}>
-          <span>
-            <strong>{stats.total}</strong> repos
-          </span>
-          <span>
-            <strong>{stats.active}</strong> active
-          </span>
-          <span>
-            <strong>{stats.archived}</strong> archived
-          </span>
-        </div>
         <div className={styles.modeSwitch} id="terminal">
           {modes.map((item) => (
             <button
@@ -1339,6 +1328,13 @@ export default function WorkspaceOS() {
 
       <section className={styles.siteFooter} id="contact" aria-label="Portfolio footer">
         <strong><img src="/Logo-transparent.png" alt="" /> Mahmoud Elfeel</strong>
+        <button
+          type="button"
+          className={styles.footerPrivacy}
+          onClick={() => window.dispatchEvent(new Event('elfeel:open-privacy-settings'))}
+        >
+          Privacy settings
+        </button>
         <span className={styles.footerReachability}>
           Reachable by{' '}
           <a href="mailto:mahmoudelfeelig@gmail.com" onClick={copyEmail}>email</a>,{' '}
