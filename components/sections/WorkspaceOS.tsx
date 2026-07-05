@@ -939,7 +939,7 @@ export default function WorkspaceOS() {
       <section className={styles.workspace} id="projects">
         <div className={styles.titleBlock}>
           <h1>
-            Projects / <span>Workspace</span>
+            Mahmoud Elfeel / <span>Portfolio</span>
           </h1>
           <p>{modeDescriptions[mode]}</p>
         </div>
@@ -1073,6 +1073,7 @@ export default function WorkspaceOS() {
                 CI/CD, and REST APIs. B.Sc. Networking Engineering expected July 2026; interested in backend and
                 full-stack roles.
               </h3>
+              <p>My name is also written as Mahmoud Elfil in some profiles and documents.</p>
             </div>
           </div>
         </section>
@@ -1279,7 +1280,7 @@ export default function WorkspaceOS() {
               <a href="mailto:mahmoudelfeelig@gmail.com" onClick={copyEmail}>
                 <Mail size={17} /> {emailCopied ? 'Email copied' : 'Email'}
               </a>
-              <a href="https://www.linkedin.com/in/mahmoudelfeel" target="_blank" rel="noreferrer">
+              <a href="https://www.linkedin.com/in/elephanto" target="_blank" rel="noreferrer">
                 <Network size={17} /> LinkedIn
               </a>
               <a href="/Mahmoud_Elfil_CV.pdf" id="resume">
@@ -1298,7 +1299,7 @@ export default function WorkspaceOS() {
         <span className={styles.footerReachability}>
           Reachable by{' '}
           <a href="mailto:mahmoudelfeelig@gmail.com" onClick={copyEmail}>email</a>,{' '}
-          <a href="https://www.linkedin.com/in/mahmoudelfeel" target="_blank" rel="noreferrer">LinkedIn</a>, or{' '}
+          <a href="https://www.linkedin.com/in/elephanto" target="_blank" rel="noreferrer">LinkedIn</a>, or{' '}
           <a href="https://github.com/mahmoudelfeelig" target="_blank" rel="noreferrer">GitHub</a>.
         </span>
       </section>
@@ -1431,7 +1432,7 @@ export default function WorkspaceOS() {
                       <Mail size={17} /> {emailCopied ? 'Email copied' : 'Email'}
                     </a>
                     <a href="https://github.com/mahmoudelfeelig" target="_blank" rel="noreferrer"><Github size={17} /> GitHub</a>
-                    <a href="https://www.linkedin.com/in/mahmoudelfeel" target="_blank" rel="noreferrer"><Network size={17} /> LinkedIn</a>
+                    <a href="https://www.linkedin.com/in/elephanto" target="_blank" rel="noreferrer"><Network size={17} /> LinkedIn</a>
                   </div>
                 )}
                 {openWindow === 'projects' && (
