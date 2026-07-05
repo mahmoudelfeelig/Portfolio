@@ -2162,6 +2162,29 @@
   gap: 14px;
 }
 
+.networkApp:fullscreen {
+  padding: 18px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  background: #02060a;
+}
+
+.networkApp:fullscreen .networkStage {
+  height: calc(100vh - 36px);
+}
+
+.networkApp:fullscreen .networkStage svg:not(.networkMinimap) {
+  height: 100%;
+  min-height: 0;
+}
+
+.networkLoading {
+  min-height: 460px;
+  display: grid;
+  place-items: center;
+  color: #8fa3ba;
+  font-size: 13px;
+}
+
 .networkStage,
 .networkInspector {
   border: 1px solid rgba(128, 169, 205, 0.16);
@@ -2178,6 +2201,143 @@
   user-select: none;
 }
 
+.networkZoomControls {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(128, 169, 205, 0.22);
+  border-radius: 7px;
+  background: rgba(5, 11, 18, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+.networkZoomControls button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  display: inline-grid;
+  place-items: center;
+  color: #c9d7e7;
+  background: transparent;
+  cursor: pointer;
+}
+
+.networkZoomControls button:hover,
+.networkZoomControls button:focus-visible {
+  color: #fff;
+  border-color: rgba(125, 211, 252, 0.48);
+  background: rgba(45, 140, 255, 0.14);
+  outline: none;
+}
+
+.networkZoomControls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.networkZoomControls output {
+  min-width: 46px;
+  color: #9fb2c8;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.networkLegend {
+  position: absolute;
+  z-index: 2;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  max-width: calc(100% - 190px);
+  padding: 7px 9px;
+  border: 1px solid rgba(128, 169, 205, 0.16);
+  border-radius: 6px;
+  color: #98a9bc;
+  background: rgba(5, 11, 18, 0.88);
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.networkLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.networkLegend i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid #90b9de;
+  display: inline-block;
+  background: rgba(45, 140, 255, 0.22);
+}
+
+.networkLegend [data-group="fullstack"] i {
+  border-radius: 50%;
+}
+
+.networkLegend [data-group="security"] i {
+  transform: rotate(30deg);
+}
+
+.networkLegend [data-group="mobile"] i {
+  height: 11px;
+  border-radius: 3px;
+}
+
+.networkLegend [data-group="academic"] i {
+  transform: rotate(45deg);
+}
+
+.networkMinimap {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 12px;
+  width: 150px !important;
+  min-width: 0 !important;
+  height: 96px;
+  min-height: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(128, 169, 205, 0.24);
+  border-radius: 6px;
+  background: rgba(5, 11, 18, 0.92);
+  cursor: crosshair;
+}
+
+.networkMinimapBackground {
+  fill: #07111d;
+}
+
+.networkMinimap line {
+  stroke: rgba(125, 211, 252, 0.24);
+  stroke-width: 3;
+}
+
+.networkMinimap circle {
+  fill: #49779f;
+}
+
+.networkMinimap .networkMinimapSelected {
+  fill: #f8fbff;
+}
+
+.networkMinimapViewport {
+  fill: rgba(45, 140, 255, 0.08);
+  stroke: rgba(125, 211, 252, 0.9);
+  stroke-width: 5;
+}
+
 .networkStage svg {
   min-width: 760px;
   width: 100%;
@@ -2190,7 +2350,9 @@
 }
 
 .networkMesh {
-  transform: translate(var(--mesh-x, 0), var(--mesh-y, 0));
+  transform: translate(var(--mesh-x, 0), var(--mesh-y, 0)) scale(var(--mesh-scale, 1));
+  transform-box: view-box;
+  transform-origin: center;
   transition: transform 80ms linear;
   animation: meshDrift 8s ease-in-out infinite;
 }

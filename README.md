@@ -85,6 +85,34 @@ Do not use `npx @cloudflare/next-on-pages` or `.vercel/output/static` for this
 project; that setup is the old Pages build path and will not run the Next API
 route correctly.
 
+### Privacy-friendly analytics
+
+The portfolio supports Umami Analytics without loading analytics code before
+the visitor consents. Add the site in Umami, copy its website ID from the
+tracking-code screen, and set:
+
+```bash
+NEXT_PUBLIC_UMAMI_WEBSITE_ID=00000000-0000-0000-0000-000000000000
+NEXT_PUBLIC_UMAMI_SCRIPT_SRC=https://cloud.umami.is/script.js
+```
+
+The integration records normal pageviews and a `Project Opened` custom event
+with `project` and `source` properties. Analytics remains unloaded until the
+visitor accepts it in the first-visit privacy dialog. Visitors can change that
+choice later through the persistent Privacy settings control. The tracker also
+respects Do Not Track, excludes query strings, and collects Core Web Vitals.
+
+### Shareable portfolio state
+
+The homepage keeps selected state in query parameters:
+
+```text
+/?project=anubis&mode=security&status=active&view=graph
+```
+
+Each project also has an indexable page at `/projects/<project-id>`, such as
+`/projects/anubis` and `/projects/tariffguard`.
+
 ## Preview
 
 - About: typing animation with highlighted keywords

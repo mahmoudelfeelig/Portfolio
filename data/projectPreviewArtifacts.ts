@@ -195,7 +195,6 @@ export const previewArtifacts: Record<string, PreviewArtifact> = {
     screenshot: {
       kind: 'image',
       alt: 'RPS web game showing the playable round and progression interface.',
-      path: '/project-previews/RPS.png',
     },
   },
 };

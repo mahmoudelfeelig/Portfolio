@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import {
@@ -40,9 +41,17 @@ import {
   type PortfolioProject,
 } from '../../data/projects';
 import { previewArtifacts } from '../../data/projectPreviewArtifacts';
+import { trackProjectOpen } from '../../lib/analytics';
 import type { RepoView } from '../../lib/githubPortfolioData';
-import { RepoNetwork } from './RepoNetwork';
 import styles from './workspaceOS.module.css';
+
+const RepoNetwork = dynamic(
+  () => import('./RepoNetwork').then((module) => module.RepoNetwork),
+  {
+    ssr: false,
+    loading: () => <div className={styles.networkLoading}>Loading repository network...</div>,
+  },
+);
 
 type Mode = 'All' | 'Full-stack' | 'Security' | 'Mobile';
 type RepoFilter = 'all' | 'active' | 'archived';
@@ -352,7 +361,7 @@ function VideoPreview({ project }: { project: PortfolioProject }) {
         tabIndex={-1}
         aria-label={`${project.title} project walkthrough`}
         poster={video.poster}
-        preload="auto"
+        preload="metadata"
         onContextMenu={(event) => event.preventDefault()}
         onCanPlay={() => setCanPlay(true)}
         onError={() => setVideoFailed(true)}
@@ -385,11 +394,11 @@ function ProjectPreview({ project }: { project: PortfolioProject }) {
       <div className={`${styles.previewShell} ${styles.portfolioPreview}`} aria-label="Portfolio preview">
         <div className={styles.recursiveViewport}>
           <div className={styles.recursiveScreen}>
-            <img src={screenshotPath} alt="The elfeel.me workspace recursively displaying itself." />
+            <img src={screenshotPath} alt="The elfeel.me workspace recursively displaying itself." decoding="async" />
             <div className={styles.recursiveLayers} aria-hidden="true">
               {[0.68, 0.4624, 0.3144, 0.2138, 0.1454, 0.0989, 0.0672, 0.0457].map((scale, index) => (
                 <span key={index} style={{ '--depth': index, '--recursive-scale': scale } as CSSProperties}>
-                  <img src={screenshotPath} alt="" />
+                  <img src={screenshotPath} alt="" loading="lazy" decoding="async" />
                 </span>
               ))}
             </div>
@@ -518,12 +527,44 @@ export default function WorkspaceOS() {
           setSelectedId(restored[0].selectedId);
         }
       }
+
+      const params = new URLSearchParams(window.location.search);
+      const requestedProject = projects.find((project) => project.id === params.get('project'));
+      const requestedMode = modes.find((candidate) => candidate.toLowerCase() === params.get('mode')?.toLowerCase());
+      const requestedStatus = params.get('status');
+
+      if (requestedProject) setSelectedId(requestedProject.id);
+      if (requestedMode) setMode(requestedMode);
+      if (requestedStatus && ['all', 'active', 'archived'].includes(requestedStatus)) {
+        setRepoFilter(requestedStatus as RepoFilter);
+      }
+      if (params.get('q')) setQuery(params.get('q')?.slice(0, 80) ?? '');
+      if (params.get('view') === 'graph') {
+        setWindows([{ app: 'graph', layout: 'maximized', minimized: false, position: { x: 0, y: 0 } }]);
+        setActiveWindow('graph');
+      }
     } catch {
       setWorkspaces(DEFAULT_WORKSPACES);
     } finally {
       setWorkspaceReady(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!workspaceReady) return;
+
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams();
+
+    if (selectedId !== 'portfolio') params.set('project', selectedId);
+    if (mode !== 'All') params.set('mode', mode.toLowerCase());
+    if (repoFilter !== 'all') params.set('status', repoFilter);
+    if (query.trim()) params.set('q', query.trim());
+    if (activeWindow === 'graph') params.set('view', 'graph');
+
+    url.search = params.toString();
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  }, [activeWindow, mode, query, repoFilter, selectedId, workspaceReady]);
 
   useEffect(() => {
     if (!workspaceReady) return;
@@ -657,6 +698,11 @@ export default function WorkspaceOS() {
   const activeExplorer = explorerProjects.filter((project) => project.status !== 'archived');
   const archivedExplorer = explorerProjects.filter((project) => project.status === 'archived');
 
+  const selectProject = (project: PortfolioProject, source: string) => {
+    setSelectedId(project.id);
+    trackProjectOpen(project.id, source);
+  };
+
   const activateWorkspace = (workspace: SavedWorkspace) => {
     setActiveWorkspaceId(workspace.id);
     setMode(workspace.mode);
@@ -772,7 +818,7 @@ export default function WorkspaceOS() {
     if (projectIsInWorkspace && targetMode && !modeProjectIds[mode].includes(project.id)) {
       setMode(targetMode);
     }
-    setSelectedId(project.id);
+    selectProject(project, sourceWindow ?? 'workspace');
     if (sourceWindow) closeWindow(sourceWindow);
     setQuery('');
     requestAnimationFrame(() => document.getElementById('featured')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
@@ -1015,7 +1061,7 @@ export default function WorkspaceOS() {
                 key={project.id}
                 className={`${styles.projectCard} ${selectedProject.id === project.id ? styles.projectCardActive : ''}`}
                 onClick={() => {
-                  setSelectedId(project.id);
+                  selectProject(project, 'featured-card');
                 }}
               >
                 <ProjectGlyph project={project} />
@@ -1056,6 +1102,9 @@ export default function WorkspaceOS() {
               )}
               <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer">
                 View on GitHub <Github size={15} />
+              </a>
+              <a href={`/projects/${selectedProject.id}`}>
+                Project page <ExternalLink size={15} />
               </a>
             </div>
           </div>
@@ -1161,7 +1210,7 @@ export default function WorkspaceOS() {
                 key={project.id}
                 className={selectedProject.id === project.id ? styles.repoActive : undefined}
                 onClick={() => {
-                  setSelectedId(project.id);
+                  selectProject(project, 'repository-explorer');
                 }}
               >
                 <span>{project.title}</span>
@@ -1175,7 +1224,7 @@ export default function WorkspaceOS() {
                 key={project.id}
                 className={selectedProject.id === project.id ? styles.repoActive : undefined}
                 onClick={() => {
-                  setSelectedId(project.id);
+                  selectProject(project, 'repository-explorer');
                 }}
               >
                 <span>{project.title}</span>
@@ -1204,6 +1253,9 @@ export default function WorkspaceOS() {
             <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer">
               View on GitHub <Github size={15} />
             </a>
+            <a href={`/projects/${selectedProject.id}`}>
+              Project page <ExternalLink size={15} />
+            </a>
           </div>
         </section>
       </aside>
@@ -1217,7 +1269,8 @@ export default function WorkspaceOS() {
               className={`${activeWindow === item.app ? styles.taskActive : ''} ${windows.some((windowItem) => windowItem.app === item.app && windowItem.minimized) ? styles.taskMinimized : ''} ${windows.some((windowItem) => windowItem.app === item.app && !windowItem.minimized) ? styles.taskOpen : ''}`}
               onClick={(event) => {
                 event.preventDefault();
-                setSelectedId(item.projectId);
+                const project = projects.find((candidate) => candidate.id === item.projectId);
+                if (project) selectProject(project, 'taskbar');
                 openApp(item.app);
               }}
             >
@@ -1405,7 +1458,7 @@ export default function WorkspaceOS() {
                   <RepoNetwork
                     githubRepos={githubRepos}
                     selectedId={selectedId}
-                    onSelect={(project) => setSelectedId(project.id)}
+                    onSelect={(project) => selectProject(project, 'repo-network')}
                   />
                 )}
                 {openWindow === 'resume' && (

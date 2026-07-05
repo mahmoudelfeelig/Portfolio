@@ -1,0 +1,127 @@
+.settingsButton {
+  position: fixed;
+  z-index: 180;
+  right: 16px;
+  bottom: 80px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(128, 169, 205, 0.28);
+  border-radius: 7px;
+  color: #b9c6d5;
+  background: rgba(5, 11, 18, 0.92);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.settingsButton:hover,
+.settingsButton:focus-visible {
+  color: #fff;
+  border-color: rgba(125, 211, 252, 0.68);
+  outline: none;
+}
+
+.backdrop {
+  position: fixed;
+  z-index: 300;
+  inset: 0;
+  padding: 18px;
+  display: grid;
+  place-items: end center;
+  background: rgba(1, 4, 8, 0.62);
+  backdrop-filter: blur(5px);
+}
+
+.dialog {
+  width: min(620px, 100%);
+  padding: 26px;
+  border: 1px solid rgba(128, 169, 205, 0.28);
+  border-radius: 12px;
+  color: #e8edf3;
+  background: #07111d;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+.eyebrow {
+  color: #79b7ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dialog h2 {
+  margin: 8px 0 12px;
+  font-size: 25px;
+}
+
+.dialog p {
+  margin: 0;
+  color: #b9c6d5;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dialog .necessary {
+  margin-top: 10px;
+  color: #8799ad;
+  font-size: 12px;
+}
+
+.actions {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.actions button,
+.cancel {
+  min-height: 42px;
+  border: 1px solid rgba(128, 169, 205, 0.3);
+  border-radius: 7px;
+  color: #d7e1ec;
+  background: rgba(255, 255, 255, 0.035);
+  font: inherit;
+  cursor: pointer;
+}
+
+.actions .accept {
+  border-color: rgba(56, 189, 248, 0.48);
+  color: #fff;
+  background: rgba(14, 165, 233, 0.2);
+}
+
+.actions button:hover,
+.actions button:focus-visible,
+.cancel:hover,
+.cancel:focus-visible {
+  border-color: rgba(125, 211, 252, 0.72);
+  outline: none;
+}
+
+.cancel {
+  width: 100%;
+  min-height: 32px;
+  margin-top: 9px;
+  border-color: transparent;
+  color: #91a3b6;
+  background: transparent;
+  font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .settingsButton {
+    right: 10px;
+    bottom: 74px;
+  }
+
+  .dialog {
+    padding: 22px;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Provider } from "../components/ui/provider";
+import AnalyticsConsent from "../components/analytics/AnalyticsConsent";
 import "../styles/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -45,9 +45,9 @@ export const metadata: Metadata = {
     lastName: "Elfeel",
     images: [
       {
-        url: "/project-previews/Portfolio.png",
-        width: 1728,
-        height: 960,
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
         alt: "Mahmoud Elfeel software engineering portfolio",
       },
     ],
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     title: "Mahmoud Elfeel (Mahmoud Elfil) | Software Engineer",
     description:
       "Backend, full-stack, mobile, security, and developer-tooling projects by Mahmoud Elfeel.",
-    images: ["/project-previews/Portfolio.png"],
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,
@@ -88,7 +88,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Provider>{children}</Provider>
+        {children}
+        <AnalyticsConsent />
       </body>
     </html>
   );
