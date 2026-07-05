@@ -1,11 +1,7 @@
 module.exports = {
   ci: {
     collect: {
-      url: [
-        'http://localhost:3000',
-        'http://localhost:3000/projects/anubis',
-        'http://localhost:3000/projects/tariffguard',
-      ],
+      url: ['http://localhost:3000'],
       startServerCommand: 'npm run build && npm run start',
       numberOfRuns: 2,
     },

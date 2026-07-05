@@ -110,9 +110,6 @@ The homepage keeps selected state in query parameters:
 /?project=anubis&mode=security&status=active&view=graph
 ```
 
-Each project also has an indexable page at `/projects/<project-id>`, such as
-`/projects/anubis` and `/projects/tariffguard`.
-
 ## Preview
 
 - About: typing animation with highlighted keywords

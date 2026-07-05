@@ -416,10 +416,6 @@ function ProjectPreview({ project }: { project: PortfolioProject }) {
   return (
     <div className={`${styles.previewShell} ${styles.artifactPreview}`} aria-label={`${project.title} preview`}>
       <VideoPreview project={project} />
-      <div className={styles.artifactBody}>
-        <strong>{artifact?.title ?? project.title}</strong>
-        <p>{artifact?.summary ?? project.description}</p>
-      </div>
     </div>
   );
 }
@@ -1103,9 +1099,6 @@ export default function WorkspaceOS() {
               <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer">
                 View on GitHub <Github size={15} />
               </a>
-              <a href={`/projects/${selectedProject.id}`}>
-                Project page <ExternalLink size={15} />
-              </a>
             </div>
           </div>
           <ProjectPreview project={selectedProject} />
@@ -1252,9 +1245,6 @@ export default function WorkspaceOS() {
             )}
             <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer">
               View on GitHub <Github size={15} />
-            </a>
-            <a href={`/projects/${selectedProject.id}`}>
-              Project page <ExternalLink size={15} />
             </a>
           </div>
         </section>

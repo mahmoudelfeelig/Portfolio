@@ -46,7 +46,7 @@ export default function AnalyticsConsent() {
         <Script
           src={scriptSrc}
           data-website-id={websiteId}
-          data-domains="elfeel.me"
+          data-domains="elfeel.me,www.elfeel.me"
           data-do-not-track="true"
           data-exclude-search="true"
           data-performance="true"

@@ -22,7 +22,6 @@ import {
   Puzzle,
   Radio,
   RotateCcw,
-  Scan,
   ShieldCheck,
   Smartphone,
   type LucideIcon,
@@ -314,10 +313,21 @@ export function RepoNetwork({
       document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  const fitGraph = () => {
-    setPan({ x: 0, y: 0 });
-    setZoom(0.9);
-  };
+  useEffect(() => {
+    const network = networkRef.current;
+    if (!network) return;
+
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setZoom((current) =>
+        clampZoom(current + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP)),
+      );
+    };
+
+    network.addEventListener("wheel", onWheel, { passive: false });
+    return () => network.removeEventListener("wheel", onWheel);
+  }, []);
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement === networkRef.current) {
@@ -331,15 +341,8 @@ export function RepoNetwork({
     <div className={styles.networkApp} ref={networkRef}>
       <section
         className={styles.networkStage}
-        onWheel={(event) => {
-          event.preventDefault();
-          setZoom((current) =>
-            clampZoom(current + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP)),
-          );
-        }}
         onPointerDown={(event) => {
-          if ((event.target as Element).closest?.('[role="button"], button'))
-            return;
+          if ((event.target as Element).closest?.("button")) return;
           event.currentTarget.setPointerCapture(event.pointerId);
           setPanState({
             dragging: true,
@@ -362,6 +365,7 @@ export function RepoNetwork({
         <div
           className={styles.networkZoomControls}
           aria-label="Repository network zoom controls"
+          onPointerDown={(event) => event.stopPropagation()}
         >
           <button
             type="button"
@@ -381,13 +385,6 @@ export function RepoNetwork({
             aria-label="Zoom in"
           >
             <Plus size={15} />
-          </button>
-          <button
-            type="button"
-            onClick={fitGraph}
-            aria-label="Fit repository network"
-          >
-            <Scan size={14} />
           </button>
           <button
             type="button"
@@ -448,17 +445,15 @@ export function RepoNetwork({
               ))}
             </g>
 
-            {positionedProjects.map((node, index) => (
+            {positionedProjects.map((node) => (
               <g
                 key={node.project.id}
                 className={styles.networkNode}
-                style={
-                  { "--float-delay": `${index * -0.37}s` } as CSSProperties
-                }
                 transform={`translate(${node.x} ${node.y})`}
                 role="button"
                 tabIndex={0}
                 aria-label={`Open ${node.project.title} repository details`}
+                onPointerDown={(event) => event.stopPropagation()}
                 onClick={() => onSelect(node.project)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -521,7 +516,7 @@ export function RepoNetwork({
               key={`mini-${node.project.id}`}
               cx={node.x}
               cy={node.y}
-              r={node.project.id === selectedProject.id ? 15 : 9}
+              r={node.project.id === selectedProject.id ? 24 : 14}
               className={
                 node.project.id === selectedProject.id
                   ? styles.networkMinimapSelected
@@ -531,10 +526,10 @@ export function RepoNetwork({
           ))}
           <rect
             className={styles.networkMinimapViewport}
-            x={miniViewportX}
-            y={miniViewportY}
-            width={miniViewportWidth}
-            height={miniViewportHeight}
+            x={miniViewportX + 8}
+            y={miniViewportY + 8}
+            width={Math.max(0, miniViewportWidth - 16)}
+            height={Math.max(0, miniViewportHeight - 16)}
           />
         </svg>
       </section>
@@ -590,9 +585,6 @@ export function RepoNetwork({
           ) : null}
           <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer">
             Open repository <ExternalLink size={14} />
-          </a>
-          <a href={`/projects/${selectedProject.id}`}>
-            Project page <ExternalLink size={14} />
           </a>
         </div>
       </aside>

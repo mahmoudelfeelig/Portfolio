@@ -2,8 +2,8 @@ export type PreviewArtifact = {
   projectId: string;
   source: 'screenshot' | 'overview';
   generatedAt: string;
-  title: string;
-  summary: string;
+  title?: string;
+  summary?: string;
   states: string[];
   screenshot?: {
     kind: 'image';
@@ -132,8 +132,6 @@ export const previewArtifacts: Record<string, PreviewArtifact> = {
     projectId: 'anubis',
     source: 'screenshot',
     generatedAt: '2026-07-04',
-    title: 'Anubis signal archive',
-    summary: 'The live analog-horror interface, viewing notes, and hand-authored puzzle world.',
     states: ['Signal archive', 'Viewing notes', 'Puzzle world'],
     screenshot: {
       kind: 'image',
