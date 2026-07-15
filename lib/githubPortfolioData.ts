@@ -1,9 +1,5 @@
 const OWNER = 'mahmoudelfeelig';
 
-const EXTERNAL_REPOS = [
-  { owner: 'Resistine', name: 'feel-bachelor' },
-];
-
 type GithubRepo = {
   name: string;
   full_name: string;
@@ -59,14 +55,14 @@ type CuratedRepoData = {
 
 // Curated from the current public README files on GitHub as of 2026-04-11.
 const CURATED_REPO_DATA: Record<string, CuratedRepoData> = {
-  'Resistine/feel-bachelor': {
-    domain: 'Mobile',
-    techStack: ['Python', 'Kotlin', 'TypeScript', 'Computer Vision', 'Mobile ML'],
+  'mahmoudelfeelig/MANTA': {
+    domain: 'Security',
+    techStack: ['Python', 'Kotlin', 'Android', 'Machine Learning', 'Network Telemetry'],
     features: [
-      'Bachelor project centered on mobile-assisted visual recognition.',
-      'Combines model-side experimentation with application-facing workflows.',
-      'Repository data is loaded directly from the external GitHub repo.',
-      'Demo experience is surfaced in the portfolio featured workspace.',
+      'Metadata-only mobile network threat detection without inspecting payload contents.',
+      'Combines an Android monitoring prototype with model training and evaluation workflows.',
+      'Uses flow behavior and network telemetry for on-device anomaly scoring.',
+      'Documents the research evidence, privacy boundary, and deployable prototype.',
     ],
   },
   Anubis: {
@@ -406,25 +402,8 @@ export async function fetchGithubRepos() {
   }
 
   const primaryRepos = (await response.json()) as GithubRepo[];
-  const externalRepos = (
-    await Promise.all(
-      EXTERNAL_REPOS.map(async (repoRef) => {
-        const externalResponse = await fetch(repoApiBase(repoRef), {
-          headers: githubHeaders(),
-          next: { revalidate: 3600 },
-        });
-
-        if (!externalResponse.ok) {
-          return null;
-        }
-
-        return (await externalResponse.json()) as GithubRepo;
-      }),
-    )
-  ).filter((repo): repo is GithubRepo => Boolean(repo));
-
   const seenRepos = new Set<string>();
-  const filtered = [...primaryRepos, ...externalRepos].filter((repo) => {
+  const filtered = primaryRepos.filter((repo) => {
     const repoKey = (repo.full_name || repo.name).toLowerCase();
     if (repo.name.toLowerCase().includes('.github') || seenRepos.has(repoKey)) return false;
     seenRepos.add(repoKey);
