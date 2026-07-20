@@ -971,7 +971,9 @@ export default function WorkspaceOS() {
           ))}
         </div>
         <button type="button" className={styles.profile} onClick={() => handleNav('about')}>
-          <span className={styles.avatar}><img src="/Logo-transparent.png" alt="" /></span>
+          <span className={styles.avatar}>
+            <img src="/profile-avatar.jpeg" alt="Mahmoud Elfeel" />
+          </span>
           <span>
             <strong>Mahmoud Elfeel</strong>
           </span>
