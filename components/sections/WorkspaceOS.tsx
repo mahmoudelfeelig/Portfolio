@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import {
   BookOpen,
@@ -41,7 +41,7 @@ import {
   type PortfolioProject,
 } from '../../data/projects';
 import { previewArtifacts } from '../../data/projectPreviewArtifacts';
-import { trackProjectOpen } from '../../lib/analytics';
+import { trackEvent, trackProjectOpen } from '../../lib/analytics';
 import type { RepoView } from '../../lib/githubPortfolioData';
 import styles from './workspaceOS.module.css';
 
@@ -341,6 +341,7 @@ function VideoPreview({ project }: { project: PortfolioProject }) {
   const artifact = previewArtifacts[project.id];
   const [videoFailed, setVideoFailed] = useState(false);
   const [canPlay, setCanPlay] = useState(false);
+  const trackedPlayback = useRef(false);
   const video = artifact?.video;
 
   if (!video || videoFailed) {
@@ -364,6 +365,11 @@ function VideoPreview({ project }: { project: PortfolioProject }) {
         preload="metadata"
         onContextMenu={(event) => event.preventDefault()}
         onCanPlay={() => setCanPlay(true)}
+        onPlay={() => {
+          if (trackedPlayback.current) return;
+          trackedPlayback.current = true;
+          trackEvent('Project Preview Played', { project: project.id });
+        }}
         onError={() => setVideoFailed(true)}
       >
         {video.sources.map((source) => (
@@ -728,6 +734,7 @@ export default function WorkspaceOS() {
   };
 
   const changeMode = (nextMode: Mode) => {
+    if (nextMode !== mode) trackEvent('Project Mode Changed', { mode: nextMode });
     setMode(nextMode);
     const allowedProjectIds = new Set(modeProjectIds[nextMode]);
     const nextProjectId = workspaceProjectIds.find((id) => allowedProjectIds.has(id));
@@ -778,6 +785,7 @@ export default function WorkspaceOS() {
     setWorkspaceEditorOpen(false);
   };
   const openApp = (app: ActiveAppWindow, layout: WindowLayout = 'normal') => {
+    trackEvent('Workspace App Opened', { app, layout });
     setWindows((current) => {
       const existing = current.find((windowItem) => windowItem.app === app);
       if (existing) {
@@ -795,6 +803,7 @@ export default function WorkspaceOS() {
   };
 
   const closeWindow = (app: ActiveAppWindow) => {
+    trackEvent('Workspace App Closed', { app });
     setWindows((current) => current.filter((windowItem) => windowItem.app !== app));
     setActiveWindow((current) => (current === app ? null : current));
   };
@@ -825,6 +834,7 @@ export default function WorkspaceOS() {
   };
 
   const handleNav = (target: string) => {
+    trackEvent('Navigation Used', { destination: target, source: 'sidebar' });
     setActiveNav(target);
     if (target === 'featured') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -842,6 +852,7 @@ export default function WorkspaceOS() {
     if (!command) return;
 
     const [verb, ...args] = command.toLowerCase().split(/\s+/);
+    trackEvent('Terminal Command Used', { command: verb });
     const append = (line: string) => setTerminalLines((lines) => [...lines, `$ ${command}`, line]);
 
     if (verb === 'clear') {
@@ -922,6 +933,14 @@ export default function WorkspaceOS() {
             id="project-search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
+            onBlur={() => {
+              if (query.trim()) {
+                trackEvent('Project Search Used', {
+                  queryLength: query.trim().length,
+                  results: searchResults.length,
+                });
+              }
+            }}
             placeholder="Search projects..."
             aria-label="Search projects"
           />
@@ -1087,18 +1106,18 @@ export default function WorkspaceOS() {
           <div className={styles.featuredCopy}>
             <span className={styles.featuredMeta}>Last updated {formatDate(getProjectUpdatedAt(selectedProject, githubRepos))}</span>
             <h2 id="featured-title">{selectedProject.id === 'scheduler' ? 'Planora' : selectedProject.title}</h2>
-            <a href={selectedProject.liveUrl ?? selectedProject.repoUrl} target="_blank" rel="noreferrer">
+            <a href={selectedProject.liveUrl ?? selectedProject.repoUrl} target="_blank" rel="noreferrer" data-analytics-project={selectedProject.id} data-analytics-source="featured-title">
               {selectedProject.domain ?? selectedProject.repoName}
             </a>
             <p>{selectedProject.description}</p>
             <ProjectLanguages project={selectedProject} githubRepos={githubRepos} detailed />
             <div className={styles.featuredActions}>
               {selectedProject.liveUrl && (
-                <a href={selectedProject.liveUrl} target="_blank" rel="noreferrer">
+                <a href={selectedProject.liveUrl} target="_blank" rel="noreferrer" data-analytics-project={selectedProject.id} data-analytics-source="featured">
                   Open Live App <ExternalLink size={15} />
                 </a>
               )}
-              <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer">
+              <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer" data-analytics-project={selectedProject.id} data-analytics-source="featured">
                 View on GitHub <Github size={15} />
               </a>
             </div>
@@ -1136,6 +1155,8 @@ export default function WorkspaceOS() {
                 href={project.repoUrl}
                 target="_blank"
                 rel="noreferrer"
+                data-analytics-project={project.id}
+                data-analytics-source="university-grid"
               >
                 <ProjectGlyph project={project} />
                 <strong>{project.title}</strong>
@@ -1191,7 +1212,10 @@ export default function WorkspaceOS() {
                 type="button"
                 key={filter}
                 className={repoFilter === filter ? styles.pillActive : undefined}
-                onClick={() => setRepoFilter(filter)}
+                onClick={() => {
+                  setRepoFilter(filter);
+                  trackEvent('Repository Filter Changed', { filter });
+                }}
               >
                 {filter}
               </button>
@@ -1241,11 +1265,11 @@ export default function WorkspaceOS() {
           <ProjectLanguages project={selectedProject} githubRepos={githubRepos} detailed />
           <div className={styles.featuredActions}>
             {selectedProject.liveUrl && (
-              <a href={selectedProject.liveUrl} target="_blank" rel="noreferrer">
+              <a href={selectedProject.liveUrl} target="_blank" rel="noreferrer" data-analytics-project={selectedProject.id} data-analytics-source="detail-panel">
                 Open Live App <ExternalLink size={15} />
               </a>
             )}
-            <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer">
+            <a href={selectedProject.repoUrl} target="_blank" rel="noreferrer" data-analytics-project={selectedProject.id} data-analytics-source="detail-panel">
               View on GitHub <Github size={15} />
             </a>
           </div>
@@ -1464,7 +1488,7 @@ export default function WorkspaceOS() {
                       <span><strong>{stats.active}</strong> active projects</span>
                       <span><strong>{universityProjects.length}</strong> academic projects</span>
                     </div>
-                    <a href="/Mahmoud_Elfil_CV.pdf" download>Download CV</a>
+                    <a href="/Mahmoud_Elfil_CV.pdf" download data-analytics-source="resume-window">Download CV</a>
                   </div>
                 )}
                 {openWindow === 'contact' && (

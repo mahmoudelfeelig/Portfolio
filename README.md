@@ -96,11 +96,32 @@ NEXT_PUBLIC_UMAMI_WEBSITE_ID=00000000-0000-0000-0000-000000000000
 NEXT_PUBLIC_UMAMI_SCRIPT_SRC=/telemetry/script.js
 ```
 
-The integration records normal pageviews and a `Project Opened` custom event
-with `project` and `source` properties. Analytics remains unloaded until the
-visitor accepts it in the first-visit privacy dialog. Visitors can change that
-choice later through the persistent Privacy settings control. The tracker also
-respects Do Not Track, excludes query strings, and collects Core Web Vitals.
+The integration records pageviews, Core Web Vitals, section reach, project
+search/filter/navigation activity, preview engagement, recruiter conversion
+steps, outbound repository/demo/CV/contact clicks, Elly outcomes, and scrubbed
+client-error categories. It never records Elly question text. Analytics remains
+unloaded until the visitor accepts it in the first-visit privacy dialog.
+Visitors can change that choice later through the persistent footer Privacy
+settings control. The tracker respects Do Not Track and excludes query strings
+and URL hashes.
+
+Optional Cloudflare Web Analytics and Sentry browser error monitoring use the
+same consent decision:
+
+```bash
+NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=
+NEXT_PUBLIC_SENTRY_LOADER_URL=
+```
+
+Find the Cloudflare token under **Analytics & Logs → Web Analytics → Manage
+site → JS snippet**. Find the Sentry Loader URL under **Project Settings →
+Client Keys (DSN) → JavaScript Loader**. Leave either value blank to keep that
+integration disabled. In Umami, use **Events → Properties** to break down event
+data and **Funnels** to build:
+
+```text
+Project Opened → Repository Opened / Live Demo Opened → Contact Clicked
+```
 
 ### Shareable portfolio state
 
