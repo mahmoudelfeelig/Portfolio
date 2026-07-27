@@ -81,6 +81,16 @@ Cloudflare configuration lives in:
 - `open-next.config.ts`
 - `next.config.ts`
 
+Production deployments are owned by Cloudflare Builds through the repository
+connection configured in the Cloudflare dashboard. Pushes to its production
+branch build and deploy the Worker automatically; other branches can produce
+preview versions. Manual Wrangler deployment remains available only for
+recovery or first-time setup.
+
+The repository explorer works without credentials and falls back to the
+portfolio's bundled project data if GitHub is unavailable. For a higher GitHub
+API rate limit, add `GITHUB_TOKEN` as a Cloudflare Worker secret.
+
 Do not use `npx @cloudflare/next-on-pages` or `.vercel/output/static` for this
 project; that setup is the old Pages build path and will not run the Next API
 route correctly.

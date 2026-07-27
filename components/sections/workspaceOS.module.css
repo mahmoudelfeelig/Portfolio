@@ -1908,6 +1908,23 @@
     transform 220ms var(--ease);
 }
 
+.appWindow_assistant {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.osWindowAssistant {
+  height: min(680px, 72vh);
+}
+
+.osWindowAssistant:has([data-state="landing"]) {
+  height: min(500px, 72vh);
+}
+
+.osWindowAssistant .appWindowBody {
+  height: calc(100% - 48px);
+}
+
 .osWindowActive {
   box-shadow: 0 42px 120px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(90, 168, 255, 0.42);
 }
@@ -2973,6 +2990,27 @@
 @media (max-width: 720px) {
   .os {
     padding: 66px 12px 178px;
+  }
+
+  .osWindowAssistant {
+    position: fixed;
+    inset: 72px 8px 92px;
+    width: auto;
+    height: auto;
+    max-height: none;
+    border-radius: 16px 16px 10px 10px;
+    transform: none;
+    animation: none;
+  }
+
+  .osWindowAssistant:has([data-state="landing"]) {
+    bottom: auto;
+    height: min(550px, calc(100vh - 164px));
+  }
+
+  .osWindowAssistant .appWindowBody {
+    height: calc(100% - 48px);
+    max-height: none;
   }
 
   .topbar {

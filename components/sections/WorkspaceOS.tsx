@@ -43,6 +43,7 @@ import {
 import { previewArtifacts } from '../../data/projectPreviewArtifacts';
 import { trackEvent, trackProjectOpen } from '../../lib/analytics';
 import type { RepoView } from '../../lib/githubPortfolioData';
+import { PortfolioAssistant } from '../ui/PortfolioAssistant';
 import styles from './workspaceOS.module.css';
 
 const RepoNetwork = dynamic(
@@ -56,7 +57,7 @@ const RepoNetwork = dynamic(
 type Mode = 'All' | 'Full-stack' | 'Security' | 'Mobile';
 type RepoFilter = 'all' | 'active' | 'archived';
 type DeviceKind = 'desktop' | 'touch';
-type AppWindow = 'projects' | 'graph' | 'terminal' | 'resume' | 'contact';
+type AppWindow = 'projects' | 'graph' | 'terminal' | 'resume' | 'contact' | 'assistant';
 type ActiveAppWindow = Exclude<AppWindow, null>;
 type WindowLayout = 'normal' | 'maximized';
 type WindowState = {
@@ -112,6 +113,7 @@ const navItems = [
 ];
 
 const taskbarItems = [
+  { label: 'Ask Elly', icon: Sparkles, href: '#assistant', projectId: 'portfolio', app: 'assistant' as ActiveAppWindow },
   { label: 'Projects', icon: Folder, href: '#projects', projectId: 'portfolio', app: 'projects' as ActiveAppWindow },
   { label: 'Repo Network', icon: GitBranch, href: '#repo-network', projectId: 'portfolio', app: 'graph' as ActiveAppWindow },
   { label: 'Terminal', icon: Terminal, href: '#terminal', projectId: 'portfolio', app: 'terminal' as ActiveAppWindow },
@@ -427,6 +429,7 @@ function ProjectPreview({ project }: { project: PortfolioProject }) {
 }
 
 function getWindowMeta(openWindow: ActiveAppWindow) {
+  if (openWindow === 'assistant') return { title: 'Ask Elly', icon: Sparkles };
   if (openWindow === 'graph') return { title: 'Repo Network', icon: GitBranch };
   if (openWindow === 'terminal') return { title: 'Terminal', icon: Terminal };
   if (openWindow === 'resume') return { title: 'CV', icon: FileText };
@@ -1384,7 +1387,7 @@ export default function WorkspaceOS() {
           style={{ zIndex: activeWindow === openWindow ? 90 : 80 + index }}
         >
           <section
-            className={`${styles.osWindow} ${windowItem.layout === 'maximized' ? styles.osWindowMaximized : ''} ${activeWindow === openWindow ? styles.osWindowActive : ''}`}
+            className={`${styles.osWindow} ${openWindow === 'assistant' ? styles.osWindowAssistant : ''} ${windowItem.layout === 'maximized' ? styles.osWindowMaximized : ''} ${activeWindow === openWindow ? styles.osWindowActive : ''}`}
             style={windowItem.layout === 'normal' ? ({ '--window-x': `${windowItem.position.x}px`, '--window-y': `${windowItem.position.y}px` } as CSSProperties) : undefined}
           >
             <header
@@ -1500,6 +1503,7 @@ export default function WorkspaceOS() {
                     <a href="https://www.linkedin.com/in/elephanto" target="_blank" rel="noreferrer"><Network size={17} /> LinkedIn</a>
                   </div>
                 )}
+                {openWindow === 'assistant' && <PortfolioAssistant />}
                 {openWindow === 'projects' && (
                   <>
                     <div className={styles.appHeader}>

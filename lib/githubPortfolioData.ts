@@ -238,9 +238,11 @@ const CURATED_REPO_DATA: Record<string, CuratedRepoData> = {
 };
 
 function githubHeaders() {
+  const token = process.env.GITHUB_TOKEN?.trim();
   return {
     Accept: 'application/vnd.github+json',
     'User-Agent': 'portfolio',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 

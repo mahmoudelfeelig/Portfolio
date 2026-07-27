@@ -6,7 +6,12 @@ export async function GET() {
     const repos = await fetchGithubRepos();
     return NextResponse.json({ repos, source: 'github-api-live' });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error while loading repositories';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({
+      repos: [],
+      source: 'portfolio-static-fallback',
+      warning: error instanceof Error
+        ? 'GitHub data is temporarily unavailable.'
+        : 'Repository data is temporarily unavailable.',
+    });
   }
 }

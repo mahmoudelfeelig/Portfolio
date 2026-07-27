@@ -8,6 +8,19 @@
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
 	},
+	"ai": {
+		"binding": "AI"
+	},
+	"ratelimits": [
+		{
+			"name": "ELLY_RATE_LIMITER",
+			"namespace_id": "27491",
+			"simple": {
+				"limit": 12,
+				"period": 60
+			}
+		}
+	],
 	"observability": {
 		"enabled": true
 	}
