@@ -2,9 +2,55 @@ import { projects } from '../data/projects';
 
 export const assistantProfile = {
   name: 'Mahmoud Elfeel',
+  alternateName: 'Mahmoud Elfil',
   location: 'Berlin, Germany',
   role: 'Junior Software Engineer',
   education: 'B.Sc. Networking Engineering, graduating July 2026',
+  focus: 'Backend and full-stack software engineering roles',
+  summary: 'Berlin-based software engineer with industry experience across backend services, internal dashboards, desktop automation, Android and iOS workflows, network security, and computer-vision pipelines.',
+  skills: [
+    'Python',
+    'FastAPI',
+    'TypeScript',
+    'React',
+    'Next.js',
+    'Node.js',
+    'Express',
+    'PostgreSQL',
+    'MongoDB',
+    'Kotlin',
+    'Swift',
+    'Linux',
+    'Docker',
+    'REST APIs',
+    'CI/CD',
+    'Wazuh',
+    'WireGuard',
+    'YOLO',
+  ],
+  experience: [
+    {
+      company: 'Resistine GmbH',
+      period: 'December 2025 to present',
+      role: 'Desktop and Android Developer, Network Security',
+      work: [
+        'Built and deployed desktop applications for Windows and Linux.',
+        'Developed Android applications with Kotlin.',
+        'Worked on MDM, endpoint protection, and other network-security tasks.',
+      ],
+    },
+    {
+      company: 'IAV GmbH',
+      period: 'October 2024 to November 2025',
+      role: 'iOS, Frontend Developer and Computer Vision',
+      work: [
+        'Built YOLO computer-vision pipelines for automotive data.',
+        'Built dashboards and internal tools with Next.js.',
+        'Prototyped Swift iOS features for vision workflows.',
+        'Improved Python analysis and processing pipelines.',
+      ],
+    },
+  ],
   email: 'mahmoudelfeelig@gmail.com',
   github: 'https://github.com/mahmoudelfeelig',
   linkedin: 'https://www.linkedin.com/in/elephanto',
@@ -56,13 +102,86 @@ export type AssistantReply = {
 };
 
 const categoryTerms: Record<Exclude<AssistantCategory, 'general' | 'contact' | 'cv'>, string[]> = {
-  backend: ['backend', 'api', 'server', 'fastapi', 'express', 'postgresql', 'mongodb', 'database', 'python'],
+  backend: ['backend', 'api', 'server', 'fastapi', 'express', 'postgresql', 'mongodb', 'database', 'serverless'],
   mobile: ['mobile', 'android', 'ios', 'kotlin', 'swift', 'phone'],
   security: ['security', 'secure', 'threat', 'network', 'privacy', 'wireguard', 'wazuh', 'vulnerability'],
   'ev-charging': ['ev', 'charging', 'charger', 'ocpp', 'tariff'],
   thesis: ['thesis', 'manta', 'bachelor', 'research', 'metadata'],
   games: ['game', 'games', 'gaming', 'minecraft', 'puzzle', 'arg'],
 };
+
+const ignoredTerms = new Set([
+  'about', 'and', 'are', 'best', 'built', 'can', 'could', 'does', 'for', 'from',
+  'has', 'have', 'his', 'how', 'into', 'mahmoud', 'most', 'project', 'projects',
+  'show', 'tell', 'that', 'the', 'this', 'what', 'which', 'with', 'work', 'would',
+]);
+
+const projectAliases: Record<string, string[]> = {
+  portfolio: ['portfolio', 'elfeel.me'],
+  scheduler: ['planora', 'scheduler', 'timetable'],
+  typeshift: ['typeshift', 'typing game'],
+  commit: ['commit', 'contribution graph'],
+  'ocpp-demo': ['ocpp', 'ocpp-demo', 'charger protocol'],
+  doompedia: ['doompedia', 'wikipedia discovery'],
+  anubis: ['anubis', 'analog horror', 'arg'],
+  bachelor: ['manta', 'bachelor thesis', 'thesis'],
+  tariffguard: ['tariffguard', 'tariff guard', 'tariff validation'],
+  rps: ['rps', 'rock paper scissors'],
+  gems: ['gems', 'minecraft mod'],
+  'processor-simulation': ['processorsimulation', 'processor simulation', 'cpu simulator'],
+  'chatting-application': ['chattingapplication', 'chatting application', 'socket chat'],
+  'data-analysis': ['dataanalysis', 'data analysis'],
+  'communication-theory': ['communicationtheory', 'communication theory'],
+  'channel-coding': ['channelcoding', 'channel coding'],
+  'systems-and-control': ['systemsandcontrol', 'systems and control'],
+  aes: ['aes', 'rijndael'],
+  pharmacy: ['pharmacy'],
+};
+
+const projectConcepts: Record<string, string[]> = {
+  tariffguard: ['backend', 'serverless', 'aws', 'lambda', 'dynamodb', 'event processing', 'audit', 'ev charging'],
+  typeshift: ['backend', 'full stack', 'express', 'postgresql', 'authentication', 'multiplayer', 'web app'],
+  scheduler: ['backend', 'optimization', 'algorithm', 'or-tools', 'constraint solver', 'python', 'desktop'],
+  bachelor: ['security', 'privacy', 'android', 'kotlin', 'machine learning', 'network', 'research'],
+  'ocpp-demo': ['backend', 'websocket', 'protocol', 'ocpp', 'ev charging', 'python'],
+  doompedia: ['mobile', 'android', 'ios', 'kotlin', 'swift', 'offline'],
+  anubis: ['game', 'puzzle', 'arg', 'next.js', 'mongodb'],
+  'chatting-application': ['backend', 'networking', 'socket', 'tcp', 'python'],
+  aes: ['security', 'cryptography', 'encryption', 'assembly'],
+  pharmacy: ['mobile', 'android', 'kotlin', 'firebase'],
+  portfolio: ['frontend', 'next.js', 'react', 'typescript', 'webgl'],
+};
+
+const categoryProjectPriority: Partial<Record<AssistantCategory, Record<string, number>>> = {
+  backend: { tariffguard: 8, typeshift: 6, scheduler: 4, 'ocpp-demo': 3, 'chatting-application': 2 },
+  mobile: { doompedia: 8, bachelor: 6, pharmacy: 4 },
+  security: { bachelor: 8, aes: 5 },
+  'ev-charging': { tariffguard: 8, 'ocpp-demo': 7 },
+  thesis: { bachelor: 10 },
+  games: { anubis: 8, gems: 5, rps: 3 },
+};
+
+function normalize(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9+#.]+/g, ' ').trim();
+}
+
+function queryTerms(question: string) {
+  return Array.from(new Set(
+    normalize(question)
+      .split(/\s+/)
+      .filter((term) => term.length > 2 && !ignoredTerms.has(term)),
+  ));
+}
+
+function explicitlyNamedProjectIds(question: string) {
+  const normalized = ` ${normalize(question)} `;
+  return assistantProjects
+    .filter((project) => (projectAliases[project.id] ?? [project.title]).some((alias) => {
+      const normalizedAlias = normalize(alias);
+      return normalizedAlias.length > 2 && normalized.includes(` ${normalizedAlias} `);
+    }))
+    .map((project) => project.id);
+}
 
 export function classifyQuestion(question: string): AssistantCategory {
   const normalized = question.toLowerCase();
@@ -83,42 +202,56 @@ export function classifyQuestion(question: string): AssistantCategory {
 
 export function findRelevantProjects(question: string, limit = 5) {
   const category = classifyQuestion(question);
-  const categoryKeywords = category in categoryTerms
-    ? categoryTerms[category as keyof typeof categoryTerms]
-    : [];
-  const terms = Array.from(new Set([
-    ...question
-      .toLowerCase()
-      .split(/[^a-z0-9+#.]+/)
-      .filter((term) => term.length > 2),
-    ...categoryKeywords,
-  ]));
+  const terms = queryTerms(question);
+  const explicitIds = explicitlyNamedProjectIds(question);
+
+  if (explicitIds.length) {
+    return explicitIds
+      .map((id) => assistantProjects.find((project) => project.id === id))
+      .filter((project): project is (typeof assistantProjects)[number] => Boolean(project))
+      .slice(0, limit);
+  }
 
   return assistantProjects
     .map((project, index) => {
-      const haystack = [
-        project.title,
+      const title = normalize(`${project.title} ${project.id} ${(projectAliases[project.id] ?? []).join(' ')}`);
+      const stack = normalize(project.stack.join(' '));
+      const details = normalize([
         project.description,
         project.category,
-        project.status,
         project.course,
         project.domain,
-        ...project.stack,
         ...project.highlights,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-      const score = terms.reduce((total, term) => total + (haystack.includes(term) ? 1 : 0), 0)
-        + (project.status === 'featured' ? 0.2 : 0)
-        + (project.liveUrl ? 0.1 : 0);
+      ].filter(Boolean).join(' '));
+      const concepts = normalize((projectConcepts[project.id] ?? []).join(' '));
+      const score = terms.reduce((total, term) => (
+        total
+        + (title.includes(term) ? 12 : 0)
+        + (concepts.includes(term) ? 6 : 0)
+        + (stack.includes(term) ? 4 : 0)
+        + (details.includes(term) ? 2 : 0)
+      ), 0)
+        + (
+          category !== 'general'
+          && (projectConcepts[project.id] ?? []).includes(category)
+            ? 5
+            : 0
+        )
+        + (categoryProjectPriority[category]?.[project.id] ?? 0)
+        + (project.status === 'featured' ? 0.15 : 0);
       return { project, score, index };
     })
-    .filter(({ score }) => score > 0)
+    .filter(({ score }) => score >= 2)
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, limit)
     .map(({ project }) => project);
+}
+
+export function projectContextLimit(question: string) {
+  if (explicitlyNamedProjectIds(question).length) return 1;
+  if (/\b(which|best|strongest|single|one|most relevant)\b/i.test(question)) return 1;
+  if (/\b(compare|projects|examples|portfolio|work)\b/i.test(question)) return 3;
+  return 2;
 }
 
 export function projectSources(projectIds: string[]): AssistantSource[] {
@@ -145,7 +278,9 @@ function projectSummary(question: string, limit = 3): AssistantReply {
     };
   }
   return {
-    answer: matches.map((project) => `${project.title}: ${project.description}`).join('\n\n'),
+    answer: matches.length === 1
+      ? `${matches[0].title} is the strongest match. ${matches[0].description} Its published highlights include ${matches[0].highlights.slice(0, 2).join(' and ').toLowerCase()}.`
+      : matches.map((project) => `${project.title}: ${project.description}`).join('\n\n'),
     projectIds: matches.map((project) => project.id),
     category,
   };
@@ -173,7 +308,7 @@ export function runDeterministicCommand(question: string): AssistantReply | null
     return projectSummary('MANTA bachelor thesis metadata mobile network security', 1);
   }
   if (command.startsWith('/projects ')) {
-    return projectSummary(command.replace('/projects ', ''), 4);
+    return projectSummary(command.replace('/projects ', ''), 3);
   }
   return {
     answer: 'I know /projects backend, /projects mobile, /projects security, /projects games, /explain manta, /cv, and /contact.',

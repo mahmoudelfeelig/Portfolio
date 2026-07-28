@@ -44,7 +44,7 @@ type StreamEvent =
 type AskSource = 'suggestion' | 'typed' | 'command';
 
 const suggestions = [
-  { label: 'Backend engineering', detail: 'APIs, systems, and data', question: '/projects backend', icon: BriefcaseBusiness },
+  { label: 'Best backend match', detail: 'One project, with evidence', question: 'Which single project best demonstrates Mahmoud’s backend engineering?', icon: BriefcaseBusiness },
   { label: 'MANTA thesis', detail: 'Research in plain English', question: '/explain manta', icon: Lightbulb },
   { label: 'EV charging', detail: 'OCPP and tariff systems', question: 'What has Mahmoud built for EV charging?', icon: Sparkles },
   { label: 'Security work', detail: 'Networks, privacy, and tooling', question: '/projects security', icon: ShieldCheck },
@@ -72,6 +72,13 @@ function recentHistory(messages: Message[]): AssistantHistoryItem[] {
     .map((message) => ({ role: message.role, content: message.text }));
 }
 
+function answerParagraphs(text: string) {
+  return text
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.replace(/\s*\n\s*/g, ' ').trim())
+    .filter(Boolean);
+}
+
 export function PortfolioAssistant() {
   const [messages, setMessages] = useState<Message[]>([welcome]);
   const [question, setQuestion] = useState('');
@@ -80,15 +87,18 @@ export function PortfolioAssistant() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [lastQuestion, setLastQuestion] = useState<{ text: string; source: AskSource } | null>(null);
   const nextId = useRef(2);
-  const endRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (messages.length > 1 || pending) {
-      endRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (pending) {
+      const container = messagesRef.current;
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      }
     }
-  }, [messages, pending]);
+  }, [pending]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -108,11 +118,12 @@ export function PortfolioAssistant() {
     const controller = new AbortController();
     abortRef.current = controller;
     setQuestion('');
+    if (inputRef.current) inputRef.current.style.height = 'auto';
     setPending(true);
     setActivity('Elly is thinking');
     setLastQuestion({ text: value, source });
     setMessages((current) => [
-      ...current,
+      ...current.filter((message) => message.id !== welcome.id),
       { id: userId, role: 'user', text: value },
       { id: assistantId, role: 'assistant', text: '', status: 'Thinking' },
     ]);
@@ -194,6 +205,7 @@ export function PortfolioAssistant() {
     abortRef.current?.abort();
     setMessages([welcome]);
     setQuestion('');
+    if (inputRef.current) inputRef.current.style.height = 'auto';
     setLastQuestion(null);
     setActivity('Ready');
     requestAnimationFrame(() => inputRef.current?.focus());
@@ -244,7 +256,7 @@ export function PortfolioAssistant() {
         </span>
       </div>
 
-      <div className={styles.messages} aria-live="polite" aria-busy={pending}>
+      <div ref={messagesRef} className={styles.messages} aria-live="polite" aria-busy={pending}>
         {messages.map((message) => (
           <article key={message.id} className={`${styles.message} ${styles[message.role]}`}>
             {message.role === 'assistant' && message.id !== welcome.id ? (
@@ -263,8 +275,8 @@ export function PortfolioAssistant() {
                   <i>{statusLabel(message.status)}</i>
                 </div>
               ) : null}
-              {message.text ? message.text.split('\n').map((line, index) => (
-                <p key={`${message.id}-${index}`}>{line || '\u00a0'}</p>
+              {message.text ? answerParagraphs(message.text).map((paragraph, index) => (
+                <p key={`${message.id}-${index}`}>{paragraph}</p>
               )) : (
                 <span className={styles.thinking} aria-label="Elly is thinking">
                   <span><i /><i /><i /></span>
@@ -304,7 +316,6 @@ export function PortfolioAssistant() {
             </div>
           </article>
         ))}
-        <div ref={endRef} />
       </div>
 
       {messages.length === 1 ? (
@@ -331,9 +342,6 @@ export function PortfolioAssistant() {
           <span>That answer did not finish.</span>
           <button type="button" onClick={() => void ask(lastQuestion.text, lastQuestion.source)}>
             <RotateCcw size={13} /> Retry
-          </button>
-          <button type="button" onClick={() => void ask(`/projects ${lastQuestion.text}`, 'command')}>
-            Show project matches
           </button>
         </div>
       ) : null}
