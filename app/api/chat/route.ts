@@ -124,11 +124,24 @@ function parseAiReply(result: WorkersAiResult, allowedProjectIds: string[], ques
   const raw = typeof result === 'string' ? result : result.response;
   if (!raw) throw new Error('empty_response');
   const rawText = typeof raw === 'string' ? raw.trim() : '';
-  let structured: StructuredAiReply | null = null;
-  try {
-    structured = JSON.parse(rawText.replace(/^```(?:json)?\s*|\s*```$/gi, '')) as StructuredAiReply;
-  } catch {
-    structured = null;
+  let structured: StructuredAiReply | null = typeof raw === 'object'
+    ? raw as StructuredAiReply
+    : null;
+  if (!structured) {
+    const withoutReasoning = rawText
+      .replace(/<think>[\s\S]*?<\/think>/gi, '')
+      .replace(/^```(?:json)?\s*|\s*```$/gi, '')
+      .trim();
+    const objectStart = withoutReasoning.indexOf('{');
+    const objectEnd = withoutReasoning.lastIndexOf('}');
+    const jsonCandidate = objectStart >= 0 && objectEnd > objectStart
+      ? withoutReasoning.slice(objectStart, objectEnd + 1)
+      : withoutReasoning;
+    try {
+      structured = JSON.parse(jsonCandidate) as StructuredAiReply;
+    } catch {
+      structured = null;
+    }
   }
   const answer = cleanAnswer(
     structured && typeof structured.answer === 'string' ? structured.answer : rawText,
