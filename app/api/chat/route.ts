@@ -102,7 +102,7 @@ function validHistory(value: unknown): AssistantHistoryItem[] {
 }
 
 function cleanAnswer(value: string) {
-  return value
+  const cleaned = value
     .replace(/<think>[\s\S]*?<\/think>/gi, '')
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/`/g, '')
@@ -110,6 +110,20 @@ function cleanAnswer(value: string) {
     .replace(/^\s*[-*]\s+/gm, '')
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')
     .trim();
+  const leakedReasoning = cleaned.search(/\n\s*\n(?:answer|reasoning|final answer)\s*:/i);
+  return (leakedReasoning > 0 ? cleaned.slice(0, leakedReasoning) : cleaned)
+    .replace(/^(?:answer|final answer)\s*:\s*/i, '')
+    .trim();
+}
+
+function qualifySubjectiveAnswer(answer: string, question: string) {
+  if (
+    /\b(best|strongest|hardest|toughest|most (?:complex|challenging|difficult|impressive|ambitious|relevant))\b/i.test(question)
+    && !/^based on (?:the )?(?:published|documented)/i.test(answer)
+  ) {
+    return `Based on the scope documented in this portfolio, ${answer.charAt(0).toLowerCase()}${answer.slice(1)}`;
+  }
+  return answer;
 }
 
 function projectIdsMentionedInAnswer(answer: string, allowedProjectIds: string[]) {
@@ -143,9 +157,9 @@ function parseAiReply(result: WorkersAiResult, allowedProjectIds: string[], ques
       structured = null;
     }
   }
-  const answer = cleanAnswer(
+  const answer = qualifySubjectiveAnswer(cleanAnswer(
     structured && typeof structured.answer === 'string' ? structured.answer : rawText,
-  );
+  ), question);
   if (!answer || answer.length > 1_200) {
     throw new Error('invalid_answer');
   }

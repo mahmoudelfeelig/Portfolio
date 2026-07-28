@@ -197,14 +197,16 @@ function explicitlyNamedProjectIds(question: string) {
 }
 
 export function classifyQuestion(question: string): AssistantCategory {
-  const normalized = question.toLowerCase();
+  const normalized = ` ${normalize(question)} `;
   if (/contact|email|linkedin|reach mahmoud/.test(normalized)) return 'contact';
   if (/\bcv\b|résumé|resume/.test(normalized)) return 'cv';
 
   let best: AssistantCategory = 'general';
   let bestScore = 0;
   for (const [category, terms] of Object.entries(categoryTerms)) {
-    const score = terms.reduce((total, term) => total + (normalized.includes(term) ? 1 : 0), 0);
+    const score = terms.reduce((total, term) => (
+      total + (normalized.includes(` ${normalize(term)} `) ? 1 : 0)
+    ), 0);
     if (score > bestScore) {
       best = category as AssistantCategory;
       bestScore = score;
