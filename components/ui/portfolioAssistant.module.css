@@ -117,9 +117,11 @@
 }
 
 .messages {
-  padding: 20px 18px;
+  padding: 20px 18px 28px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  overflow-anchor: none;
+  scroll-padding-block: 18px 32px;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -128,6 +130,7 @@
 }
 
 .message {
+  flex: 0 0 auto;
   max-width: 94%;
   display: flex;
   gap: 8px;
@@ -266,6 +269,10 @@
   color: #dbeafe;
   background: rgba(3, 13, 23, 0.44);
   text-decoration: none;
+}
+
+.sources > a:only-of-type {
+  grid-column: 1 / -1;
 }
 
 .sources > a > svg {
@@ -598,7 +605,7 @@
   }
 
   .messages {
-    padding: 13px;
+    padding: 13px 13px 24px;
   }
 
   .message {

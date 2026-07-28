@@ -6,6 +6,7 @@ import {
   classifyQuestion,
   fallbackReply,
   findRelevantProjects,
+  isSingleWinnerQuestion,
   projectContextLimit,
   projectSources,
   runDeterministicCommand,
@@ -24,6 +25,7 @@ const requestsByVisitor = new Map<string, { count: number; resetAt: number }>();
 const encoder = new TextEncoder();
 
 type WorkersAiResult = { response?: string | Record<string, unknown> } | string;
+type StructuredAiReply = { answer?: unknown; projectIds?: unknown };
 type WorkersAiBinding = {
   run: (model: string, input: Record<string, unknown>) => Promise<WorkersAiResult>;
 };
@@ -91,21 +93,46 @@ function validHistory(value: unknown): AssistantHistoryItem[] {
       && ('content' in item)
       && typeof item.content === 'string'
     ))
-    .map((item) => ({ role: item.role, content: item.content.slice(0, MAX_QUESTION_LENGTH) }));
+    .map((item) => ({
+      role: item.role,
+      content: item.content
+        .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')
+        .slice(0, MAX_QUESTION_LENGTH),
+    }));
 }
 
-function parseAiReply(result: WorkersAiResult, projectIds: string[], question: string): AssistantReply {
+function cleanAnswer(value: string) {
+  return value
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/`/g, '')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*[-*]\s+/gm, '')
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')
+    .trim();
+}
+
+function projectIdsMentionedInAnswer(answer: string, allowedProjectIds: string[]) {
+  const normalizedAnswer = answer.toLowerCase();
+  return allowedProjectIds.filter((id) => {
+    const project = assistantProjects.find((candidate) => candidate.id === id);
+    return project && normalizedAnswer.includes(project.title.toLowerCase());
+  });
+}
+
+function parseAiReply(result: WorkersAiResult, allowedProjectIds: string[], question: string): AssistantReply {
   const raw = typeof result === 'string' ? result : result.response;
   if (!raw) throw new Error('empty_response');
-  const answer = typeof raw === 'string'
-    ? raw
-      .replace(/<think>[\s\S]*?<\/think>/gi, '')
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/`/g, '')
-      .replace(/^#{1,6}\s+/gm, '')
-      .replace(/^\s*[-*]\s+/gm, '')
-      .trim()
-    : '';
+  const rawText = typeof raw === 'string' ? raw.trim() : '';
+  let structured: StructuredAiReply | null = null;
+  try {
+    structured = JSON.parse(rawText.replace(/^```(?:json)?\s*|\s*```$/gi, '')) as StructuredAiReply;
+  } catch {
+    structured = null;
+  }
+  const answer = cleanAnswer(
+    structured && typeof structured.answer === 'string' ? structured.answer : rawText,
+  );
   if (!answer || answer.length > 1_200) {
     throw new Error('invalid_answer');
   }
@@ -115,9 +142,15 @@ function parseAiReply(result: WorkersAiResult, projectIds: string[], question: s
   ) {
     throw new Error('unsafe_answer');
   }
+  const requestedProjectIds = structured && Array.isArray(structured.projectIds)
+    ? structured.projectIds.filter((id): id is string => typeof id === 'string')
+    : projectIdsMentionedInAnswer(answer, allowedProjectIds);
+  const projectIds = Array.from(new Set(requestedProjectIds))
+    .filter((id) => allowedProjectIds.includes(id))
+    .slice(0, isSingleWinnerQuestion(question) ? 1 : 3);
   return {
     answer,
-    projectIds: Array.from(new Set(projectIds)).slice(0, 4),
+    projectIds,
     category: classifyQuestion(question),
   };
 }
@@ -133,9 +166,11 @@ function retrievalQuestion(question: string, history: AssistantHistoryItem[]) {
 function isInstructionAttack(question: string) {
   return [
     /ignore (?:all |any )?(?:previous|prior|above) instructions?/i,
+    /(?:forget|disregard|bypass).{0,30}(?:rules?|instructions?|guardrails?|safety)/i,
     /(?:reveal|repeat|show|print|leak|expose).{0,40}(?:system prompt|developer message|hidden instructions?|chain of thought|api key|secret)/i,
     /(?:system prompt|developer message|hidden instructions?|chain of thought|api key|secret).{0,40}(?:reveal|repeat|show|print|leak|expose)/i,
-    /jailbreak|prompt injection|act as|override/i,
+    /(?:jailbreak|prompt injection).{0,40}(?:execute|follow|apply|use)|(?:override|replace).{0,30}(?:rules?|instructions?|system prompt)/i,
+    /(?:you are now|new system message|developer message:|system:).{0,80}(?:ignore|override|instead|must)/i,
   ].some((pattern) => pattern.test(question));
 }
 
@@ -186,11 +221,14 @@ async function askWorkersAi(question: string, history: AssistantHistoryItem[]) {
     'Answer only from PROFILE and PROJECTS. PROFILE includes verified employment, education, skills, and contact facts.',
     'Answer the exact question first. Do not list extra projects merely because they are available in context.',
     'When one project is supplied, discuss only that project. When several are supplied, mention only those needed to answer.',
+    'For subjective comparisons such as hardest or best, say that the judgment is based on the published scope, then give the concrete criteria behind it.',
     'If the answer is unsupported, say exactly what is not documented, then suggest one relevant question Elly can answer. Do not redirect every unknown question to email.',
     'Keep the answer warm, specific, under 140 words, and useful to a recruiter or technical collaborator.',
     'Structure it as two or three short plain-text paragraphs separated by blank lines: lead with the direct answer, support it with concrete project evidence, and end with a useful takeaway when appropriate.',
     'Do not end with an invitation to ask more or a generic suggested next step unless the requested fact is unsupported.',
-    'Do not use Markdown, URLs, labels, JSON, reasoning tags, generic praise, or repeat the question.',
+    'Return one compact JSON object with exactly two keys: "answer" containing plain text and "projectIds" containing only IDs of projects actually used as evidence.',
+    'The projectIds array must be a subset of the supplied PROJECTS IDs. Use an empty array for profile-only or unsupported answers.',
+    'Inside "answer", do not use Markdown, URLs, labels, reasoning tags, generic praise, or repeat the question.',
     `PROFILE: ${JSON.stringify(assistantProfile)}`,
     `PROJECTS: ${JSON.stringify(relevantProjects)}`,
   ].join('\n');
@@ -202,7 +240,6 @@ async function askWorkersAi(question: string, history: AssistantHistoryItem[]) {
     ai.run(model, {
       messages: [
         { role: 'system', content: systemPrompt },
-        ...history,
         { role: 'user', content: question },
       ],
       temperature: 0.2,

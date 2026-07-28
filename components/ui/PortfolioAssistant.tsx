@@ -94,9 +94,14 @@ export function PortfolioAssistant() {
   useEffect(() => {
     if (pending) {
       const container = messagesRef.current;
-      if (container) {
-        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-      }
+      const latestMessage = container?.lastElementChild;
+      if (!container || !latestMessage) return;
+      const containerTop = container.getBoundingClientRect().top;
+      const messageTop = latestMessage.getBoundingClientRect().top;
+      container.scrollTo({
+        top: Math.max(0, container.scrollTop + messageTop - containerTop - 8),
+        behavior: 'auto',
+      });
     }
   }, [pending]);
 
@@ -286,7 +291,7 @@ export function PortfolioAssistant() {
               {message.sources?.length ? (
                 <div className={styles.sources} aria-label="Verified portfolio sources">
                   <div className={styles.sourcesHeading}>
-                    <span><ShieldCheck size={13} /> Evidence from the portfolio</span>
+                    <span><ShieldCheck size={13} /> Evidence used in this answer</span>
                     <small>{message.sources.length} {message.sources.length === 1 ? 'source' : 'sources'}</small>
                   </div>
                   {message.sources.map((source, index) => (

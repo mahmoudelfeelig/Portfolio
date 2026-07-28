@@ -101,6 +101,8 @@ export type AssistantReply = {
   category: AssistantCategory;
 };
 
+const singleWinnerPattern = /\b(best|strongest|hardest|toughest|most (?:complex|challenging|difficult|impressive|ambitious|relevant)|single|top|one project)\b/i;
+
 const categoryTerms: Record<Exclude<AssistantCategory, 'general' | 'contact' | 'cv'>, string[]> = {
   backend: ['backend', 'api', 'server', 'fastapi', 'express', 'postgresql', 'mongodb', 'database', 'serverless'],
   mobile: ['mobile', 'android', 'ios', 'kotlin', 'swift', 'phone'],
@@ -161,6 +163,17 @@ const categoryProjectPriority: Partial<Record<AssistantCategory, Record<string, 
   games: { anubis: 8, gems: 5, rps: 3 },
 };
 
+const comparativeProjectPriority: Array<{ pattern: RegExp; projectIds: string[] }> = [
+  {
+    pattern: /\b(hardest|toughest|most (?:complex|challenging|difficult|ambitious))\b/i,
+    projectIds: ['bachelor', 'tariffguard', 'typeshift', 'scheduler'],
+  },
+  {
+    pattern: /\b(most impressive|strongest overall|best overall)\b/i,
+    projectIds: ['bachelor', 'tariffguard', 'typeshift', 'anubis'],
+  },
+];
+
 function normalize(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9+#.]+/g, ' ').trim();
 }
@@ -212,6 +225,14 @@ export function findRelevantProjects(question: string, limit = 5) {
       .slice(0, limit);
   }
 
+  const comparativeRanking = comparativeProjectPriority.find(({ pattern }) => pattern.test(question));
+  if (comparativeRanking && category === 'general') {
+    return comparativeRanking.projectIds
+      .map((id) => assistantProjects.find((project) => project.id === id))
+      .filter((project): project is (typeof assistantProjects)[number] => Boolean(project))
+      .slice(0, limit);
+  }
+
   return assistantProjects
     .map((project, index) => {
       const title = normalize(`${project.title} ${project.id} ${(projectAliases[project.id] ?? []).join(' ')}`);
@@ -249,9 +270,13 @@ export function findRelevantProjects(question: string, limit = 5) {
 
 export function projectContextLimit(question: string) {
   if (explicitlyNamedProjectIds(question).length) return 1;
-  if (/\b(which|best|strongest|single|one|most relevant)\b/i.test(question)) return 1;
+  if (singleWinnerPattern.test(question)) return 1;
   if (/\b(compare|projects|examples|portfolio|work)\b/i.test(question)) return 3;
   return 2;
+}
+
+export function isSingleWinnerQuestion(question: string) {
+  return singleWinnerPattern.test(question);
 }
 
 export function projectSources(projectIds: string[]): AssistantSource[] {
@@ -272,7 +297,7 @@ function projectSummary(question: string, limit = 3): AssistantReply {
   const matches = findRelevantProjects(question, limit);
   if (!matches.length) {
     return {
-      answer: `I do not have that detail in Mahmoud's public portfolio yet. You can contact him directly at ${assistantProfile.email}.`,
+      answer: 'That detail is not documented in Mahmoud’s public portfolio, so I cannot answer it reliably. I can instead explain which published project best matches a role or technology.',
       projectIds: [],
       category,
     };
@@ -321,5 +346,5 @@ export function fallbackReply(question: string): AssistantReply {
   const category = classifyQuestion(question);
   if (category === 'contact') return runDeterministicCommand('/contact') as AssistantReply;
   if (category === 'cv') return runDeterministicCommand('/cv') as AssistantReply;
-  return projectSummary(question);
+  return projectSummary(question, projectContextLimit(question));
 }
