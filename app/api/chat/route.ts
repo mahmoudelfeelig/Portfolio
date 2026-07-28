@@ -121,7 +121,10 @@ function qualifySubjectiveAnswer(answer: string, question: string) {
     /\b(best|strongest|hardest|toughest|most (?:complex|challenging|difficult|impressive|ambitious|relevant))\b/i.test(question)
     && !/^based on (?:the )?(?:published|documented)/i.test(answer)
   ) {
-    return `Based on the scope documented in this portfolio, ${answer.charAt(0).toLowerCase()}${answer.slice(1)}`;
+    const continuation = /^(?:the|a|an)\b/i.test(answer)
+      ? `${answer.charAt(0).toLowerCase()}${answer.slice(1)}`
+      : answer;
+    return `Based on the scope documented in this portfolio, ${continuation}`;
   }
   return answer;
 }
