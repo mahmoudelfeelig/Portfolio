@@ -255,6 +255,21 @@ async function askWorkersAi(question: string, history: AssistantHistoryItem[]) {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: question },
       ],
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          type: 'object',
+          properties: {
+            answer: { type: 'string' },
+            projectIds: {
+              type: 'array',
+              items: { type: 'string' },
+            },
+          },
+          required: ['answer', 'projectIds'],
+          additionalProperties: false,
+        },
+      },
       temperature: 0.2,
       max_tokens: 700,
     }),
