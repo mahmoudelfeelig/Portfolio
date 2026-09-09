@@ -1,6 +1,6 @@
 export const transition = {
   duration: 0.42,
-  ease: [0.2, 0.8, 0.2, 1],
+  ease: [0.2, 0.8, 0.2, 1] as const,
 };
 
 export const sectionVariants = {
