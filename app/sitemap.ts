@@ -1,5 +1,59 @@
 import type { MetadataRoute } from "next";
 
+// Public routes hosted across the verified elfeel.me domain. Keep account,
+// admin, API, user profile, and session-specific pages out of search results.
+const publicRoutes: ReadonlyArray<readonly [host: string, paths: readonly string[]]> = [
+  ["https://academy.elfeel.me", ["/"]],
+  ["https://anubis.elfeel.me", ["/", "/hints", "/leaderboard"]],
+  ["https://bachelor.elfeel.me", ["/", "/demo"]],
+  ["https://commit.elfeel.me", ["/"]],
+  ["https://curate.elfeel.me", ["/"]],
+  ["https://doompedia.elfeel.me", ["/"]],
+  ["https://foundroll.elfeel.me", ["/"]],
+  ["https://ocpp.elfeel.me", ["/"]],
+  ["https://planora.elfeel.me", ["/", "/faq", "/privacy"]],
+  ["https://rps.elfeel.me", ["/", "/rules", "/privacy", "/cookies"]],
+  [
+    "https://scenechain.elfeel.me",
+    ["/", "/how-it-works", "/practice", "/privacy", "/research/consent"],
+  ],
+  ["https://situationroom.elfeel.me", ["/"]],
+  ["https://systemforge.elfeel.me", ["/"]],
+  ["https://tariffguard.elfeel.me", ["/"]],
+  [
+    "https://typeshift.elfeel.me",
+    [
+      "/",
+      "/games",
+      "/boards",
+      "/games/sprint",
+      "/games/quote",
+      "/games/elephant-run",
+      "/games/flow",
+      "/games/pulse",
+      "/games/relay",
+      "/games/cipher",
+      "/games/drift",
+      "/games/reverse",
+      "/games/echo",
+      "/games/rogue",
+      "/games/rhythm-duel",
+      "/games/code",
+      "/games/coach",
+      "/games/blackout",
+      "/games/chain",
+      "/games/gravity-flip",
+      "/games/co-op-relay",
+      "/games/infection",
+      "/games/stealth",
+      "/games/rhythm-chart",
+      "/terms",
+      "/privacy-policy",
+      "/cookies",
+    ],
+  ],
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
@@ -7,20 +61,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
-    { url: "https://academy.elfeel.me/" },
-    { url: "https://anubis.elfeel.me/" },
-    { url: "https://bachelor.elfeel.me/" },
-    { url: "https://commit.elfeel.me/" },
-    { url: "https://curate.elfeel.me/" },
-    { url: "https://doompedia.elfeel.me/" },
-    { url: "https://foundroll.elfeel.me/" },
-    { url: "https://ocpp.elfeel.me/" },
-    { url: "https://planora.elfeel.me/" },
-    { url: "https://rps.elfeel.me/" },
-    { url: "https://scenechain.elfeel.me/" },
-    { url: "https://situationroom.elfeel.me/" },
-    { url: "https://systemforge.elfeel.me/" },
-    { url: "https://tariffguard.elfeel.me/" },
-    { url: "https://typeshift.elfeel.me/" },
+    ...publicRoutes.flatMap(([host, paths]) =>
+      paths.map((path) => ({ url: `${host}${path}` })),
+    ),
   ];
 }
