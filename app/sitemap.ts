@@ -61,6 +61,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
+    { url: "https://elfeel.me/projects/curate" },
+    { url: "https://elfeel.me/projects/found-roll" },
     ...publicRoutes.flatMap(([host, paths]) =>
       paths.map((path) => ({ url: `${host}${path}` })),
     ),
