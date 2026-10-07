@@ -1,21 +1,10 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getProjectPage, projectPages } from "../projectPages";
-import styles from "../projectPages.module.css";
+import type { projectPages } from "./projectPages";
+import styles from "./projectPages.module.css";
 
-type PageProps = { params: Promise<{ slug: string }> };
+type Project = (typeof projectPages)[number];
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return projectPages.map(({ slug }) => ({ slug }));
-}
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const project = getProjectPage(slug);
-  if (!project) return {};
-
+export function projectMetadata(project: Project): Metadata {
   const url = `https://elfeel.me/projects/${project.slug}`;
   return {
     title: project.title,
@@ -30,11 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function ProjectPage({ params }: PageProps) {
-  const { slug } = await params;
-  const project = getProjectPage(slug);
-  if (!project) notFound();
-
+export default function ProjectPage({ project }: { project: Project }) {
   return (
     <main className={styles.page}>
       <a className={styles.back} href="/">Mahmoud Elfeel / Projects</a>

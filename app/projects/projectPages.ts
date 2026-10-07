@@ -30,7 +30,3 @@ export const projectPages = [
     repositoryUrl: "https://github.com/mahmoudelfeelig/found-roll",
   },
 ] as const;
-
-export function getProjectPage(slug: string) {
-  return projectPages.find((project) => project.slug === slug);
-}
